@@ -20,26 +20,27 @@ import { TableContainer, Paper } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import * as Yup from 'yup';
 import Select from 'views/Patient/FormsUI/Select';
+import { useNavigate } from 'react-router';
 import { makeStyles } from '@mui/styles';
 import TextField1 from 'views/Patient/FormsUI/Textfield/index.js';
-const CustomCheckbox = ({ checked, onChange }) => (
-  <input type="checkbox" checked={checked} onChange={onChange} />
-);
+const CustomCheckbox = ({ checked, onChange }) => <input type="checkbox" checked={checked} onChange={onChange} />;
 const SampleCollectionIndex = () => {
   const { patientId, encounterId, labnumber } = useParams();
   const [patientdata, setPatientdata] = useState(null);
   const [chargeDetails, setChargeDetails] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-
+  const navigate = useNavigate();
   const [initialFormState, setInitialFormState] = useState({
     Container1: '',
-    Container2: '',
+    Container2: ''
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await customAxios.get(`${urlGetPatientHeaderWithPatientIAndEncounterId}?PatientId=${patientId}&EncounterId=${encounterId}`);
+        const response = await customAxios.get(
+          `${urlGetPatientHeaderWithPatientIAndEncounterId}?PatientId=${patientId}&EncounterId=${encounterId}`
+        );
         if (response.status === 200) {
           const patientdetail = response.data.data.EncounterModel;
           setPatientdata(patientdetail);
@@ -56,7 +57,9 @@ const SampleCollectionIndex = () => {
 
   const fetchChargeDetails = async () => {
     try {
-      const response = await customAxios.get(`${urlSampleCollectionIndex}?PatientId=${patientId}&EncounterId=${encounterId}&SelclabId=${labnumber}`);
+      const response = await customAxios.get(
+        `${urlSampleCollectionIndex}?PatientId=${patientId}&EncounterId=${encounterId}&SelclabId=${labnumber}`
+      );
       if (response.status === 200) {
         const patientdetail = response.data.data.ListOfSamplColTests;
         setChargeDetails(patientdetail);
@@ -71,7 +74,6 @@ const SampleCollectionIndex = () => {
   useEffect(() => {
     fetchChargeDetails();
   }, [patientId, encounterId, labnumber]);
-
 
   const handleSelectionChange = (SmpColHeaderId) => {
     debugger;
@@ -94,13 +96,12 @@ const SampleCollectionIndex = () => {
 
     // Now, selectedRowsData contains the full row data for the selected rows
     console.log('Selected Rows Data:', selectedRowsData);
-
   };
   const useStyles = makeStyles((theme) => ({
     formWrapper: {
       marginTop: theme.spacing(5),
-      marginBottom: theme.spacing(8),
-    },
+      marginBottom: theme.spacing(8)
+    }
   }));
   const handleSelectAllChange = (checked) => {
     debugger;
@@ -115,30 +116,35 @@ const SampleCollectionIndex = () => {
       headerName: 'Checkbox Header',
       headerClassName: 'super-app-theme--header',
       renderHeader: () => (
-        <CustomCheckbox
-          checked={selectedRows.length === chargeDetails.length}
-          onChange={(e) => handleSelectAllChange(e.target.checked)}
-        />
+        <CustomCheckbox checked={selectedRows.length === chargeDetails.length} onChange={(e) => handleSelectAllChange(e.target.checked)} />
       ),
       flex: 1,
       renderCell: (params) => {
         const { SmpColHeaderId, IsSampleCollected } = params.row;
 
         // If IsSampleCollected is true, display "Done"; otherwise, display a checkbox
-        return IsSampleCollected ? 'Done' : (
+        return IsSampleCollected ? (
+          'Done'
+        ) : (
           <CustomCheckbox
             checked={selectedRows.some((row) => row.SmpColHeaderId === SmpColHeaderId)}
             onChange={() => handleSelectionChange(SmpColHeaderId)}
           />
         );
-      },
+      }
     },
 
     { field: 'TestName', headerName: 'Test Name', headerClassName: 'super-app-theme--header', flex: 1 },
     { field: 'PatientNetAmount', headerName: 'Amount', headerClassName: 'super-app-theme--header', flex: 1 },
-    { field: 'LabNumber', headerName: 'Lab Number', headerClassName: 'super-app-theme--header', flex: 1 },
+    { field: 'LabNumber', headerName: 'Lab Number', headerClassName: 'super-app-theme--header', flex: 1 }
   ];
-
+  const handleButtonClick = (tab) => {
+    debugger;
+    if (tab == 'ResultEntry') {
+      const url = `/ResultentryIndex/${patientId}/${encounterId}/${labnumber}`;
+      navigate(url);
+    }
+  };
 
   const encounterId1 = 0;
   return (
@@ -156,14 +162,14 @@ const SampleCollectionIndex = () => {
                   console.log('Selected rows:', selectedRows);
 
                   const updatedSelectedRowsData = selectedRows
-                    .filter(row => !row.IsSampleCollected)  // Filter out rows where IsSampleCollected is true
-                    .map(row => ({
+                    .filter((row) => !row.IsSampleCollected) // Filter out rows where IsSampleCollected is true
+                    .map((row) => ({
                       ...row,
-                      ...values,
+                      ...values
                     }));
                   // Assuming your API endpoint is something like this
                   if (updatedSelectedRowsData.length == 0) {
-                    toast.warning("SampleCollection Is Done For All Tests.. ");
+                    toast.warning('SampleCollection Is Done For All Tests.. ');
                   } else {
                     const apiUrl = urlSaveSampleColResult;
                     try {
@@ -174,10 +180,9 @@ const SampleCollectionIndex = () => {
 
                       if (response.data.data.Status !== '') {
                         var message = response.data.data.Status;
-                        if (message.includes("Sample Collection Saved Successfully.")) {
+                        if (message.includes('Sample Collection Saved Successfully.')) {
                           fetchChargeDetails();
                           toast.success(message);
-
                         } else {
                           toast.warning(message);
                         }
@@ -188,14 +193,36 @@ const SampleCollectionIndex = () => {
                       // Handle error if needed
                     }
                   }
-
                 }}
               >
                 <Form>
                   <Grid container spacing={2}>
-                 
                     <Grid item xs={12}>
                       <Typography variant="h3">SampleCollection</Typography>
+
+                      <Grid container spacing={2}>
+                        <Grid item>
+                          <MuiButton variant="contained" onClick={() => handleButtonClick('SampleCollection')}>
+                            Sample Collection
+                          </MuiButton>
+                        </Grid>
+                        <Grid item>
+                          <MuiButton variant="contained" onClick={() => handleButtonClick('ResultEntry')}>
+                            Result Entry
+                          </MuiButton>
+                        </Grid>
+                        <Grid item>
+                          <MuiButton variant="contained" onClick={() => handleButtonClick('Verification')}>
+                            Verification
+                          </MuiButton>
+                        </Grid>
+                        <Grid item>
+                          <MuiButton variant="contained" onClick={() => handleButtonClick('Report')}>
+                            Report
+                          </MuiButton>
+                        </Grid>
+                      </Grid>
+
                       <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
                     </Grid>
                     <Grid item xs={12}>
@@ -206,8 +233,8 @@ const SampleCollectionIndex = () => {
                           '& .super-app-theme--header': {
                             backgroundColor: 'rgba(0, 123, 255, 0.8)',
                             color: 'white', // Set the font color to white or any other color you prefer
-                            fontWeight: 'bold', // Optionally, you can set the font weight
-                          },
+                            fontWeight: 'bold' // Optionally, you can set the font weight
+                          }
                         }}
                       >
                         <TableContainer component={Paper}>
@@ -218,31 +245,30 @@ const SampleCollectionIndex = () => {
                               pageSize={5}
                               disableColumnFilter
                               getRowClassName={(params) => {
-                                return params.row.IsSampleCollected ? "highlight" : "";
+                                return params.row.IsSampleCollected ? 'highlight' : '';
                               }}
                               sx={{
-                                ".highlight": {
-                                  bgcolor: "green",
+                                '.highlight': {
+                                  bgcolor: 'green',
                                   color: 'white', // Set the font color to white or any other color you prefer
                                   fontWeight: 'bold', // Optionally, you can set the font weight
-                                  "&:hover": {
-                                    bgcolor: "lightgreen",
-                                  },
-                                },
+                                  '&:hover': {
+                                    bgcolor: 'green'
+                                  }
+                                }
                               }}
                               disableColumnSelector
                               disableDensitySelector
                               disableRowSelectionOnClick
                               slots={{ toolbar: GridToolbar }}
                               getRowId={(row) => row.SmpColHeaderId}
-
                               slotProps={{
                                 toolbar: {
                                   showQuickFilter: true,
                                   quickFilterProps: { debounceMs: 500 },
                                   printOptions: { disableToolbarButton: true },
-                                  csvOptions: { disableToolbarButton: true },
-                                },
+                                  csvOptions: { disableToolbarButton: true }
+                                }
                               }}
                             />
                           </div>
@@ -259,7 +285,9 @@ const SampleCollectionIndex = () => {
                     <Grid item xs={2}></Grid>
                     <Grid item xs={10}></Grid>
                     <Grid item xs={2} textAlign={'end'}>
-                      <Button type="submit" style={{ width: '100%' }}>Submit</Button>
+                      <Button type="submit" style={{ width: '100%' }}>
+                        Submit
+                      </Button>
                     </Grid>
                   </Grid>
                 </Form>
@@ -268,12 +296,8 @@ const SampleCollectionIndex = () => {
           </Container>
         </Grid>
       </Grid>
-
     </Box>
-
-
   );
 };
 
 export default SampleCollectionIndex;
-

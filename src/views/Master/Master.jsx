@@ -80,6 +80,7 @@ const Master = () => {
       console.error('Error fetching data:', error);
     }
   };
+
   useEffect(() => {
     // Initial data fetch
     fetchChargeDetails();
@@ -96,11 +97,11 @@ const Master = () => {
     const ServiceId = selectedService?.ServiceId || '';
     setFieldValue('Price', Priceup);
     setFieldValue('Service', ServiceId);
+    setOptions([]);
   };
 
   const handleSubmit = async (values, { resetForm }) => {
     debugger;
-    console.log('hi');
     try {
       const { Service, Price, Date } = values;
       const { PatientType } = patientdata || {};
@@ -133,6 +134,7 @@ const Master = () => {
             Price: '' // Reset Price field
           }
         });
+        setSelectedService(null); // Clear selected service
         setResetInput(true);
         setClearSelectedValue(true);
       } else {
@@ -206,7 +208,6 @@ const Master = () => {
       });
       if (response.data.data.Status === 'true') {
         fetchChargeDetails();
-
         toast.success('Billed');
         resetForm(); // Reset the second form
       } else {

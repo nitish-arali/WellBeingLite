@@ -3,7 +3,7 @@ import { TextField } from '@mui/material';
 import NumericTextBox from '../NumericTextBox/NumericTextBox';
 import { useField } from 'formik';
 
-const TextFieldWrapper = ({ name, numeric, ...otherProps }) => {
+const TextFieldWrapper = ({ name, numeric, placeholder, ...otherProps }) => {
   const [field, meta] = useField(name);
 
   const InputComponent = numeric ? NumericTextBox : TextField;
@@ -14,6 +14,7 @@ const TextFieldWrapper = ({ name, numeric, ...otherProps }) => {
     fullWidth: true,
     variant: 'outlined',
     size: 'small',
+    placeholder: placeholder || '' // Use the provided placeholder or an empty string
   };
 
   if (meta && meta.touched && meta.error) {

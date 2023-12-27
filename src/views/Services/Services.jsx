@@ -11,15 +11,15 @@ import { Container } from '@mui/system';
 import TextField1 from 'views/Patient/FormsUI/Textfield/index.js';
 import { TableContainer, Paper } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-//import { TextField, MenuItem } from '@mui/material';
-import Select from 'views/Patient/FormsUI/Select';
+import { MenuItem } from '@mui/material';
+import Select1 from 'views/Patient/FormsUI/Select';
 import Button from 'views/Patient/FormsUI/Button';
 import CustomSelect from 'views/Patient/FormsUI/CustomSelect';
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
+import { Select, InputLabel } from '@mui/material';
 //import customAxios from 'views/Patient/FormsUI/CustomAxios';
 import CheckboxWrapper from 'views/Patient/FormsUI/CheckBox';
- 
 import * as Yup from 'yup';
 import Textarea from 'views/Patient/FormsUI/Textarea/index.js';
 
@@ -40,18 +40,18 @@ export default function Services() {
     SampleTypes: []
   });
 
-  
- 
+
+
   const Status = [
     { id: 'true', name: 'Active' },
     { id: 'false', name: 'Hidden' },
-   
+
   ];
 
   const [selectedValue, setSelectedValue] = useState('');
 
   const [secondDropdownData, setSecondDropdownData] = useState([]);
-
+  // const [selectOptions, setSelectOptions] = useState([]);
   useEffect(() => {
     axios.get(urlCreateNewService).then((response) => {
       const apiData = response.data.data;
@@ -62,12 +62,22 @@ export default function Services() {
   const [serviceDetails, setServiceDetails] = useState([]);
 
 
-  // State to manage the textarea value
   const [textareaValue, setTextareaValue] = useState('');
-
+  const [selectOptions, setSelectOptions] = useState([]);
+  const [normalValue, setNormalValue] = useState(''); // Set an initial value here
+  
   // Handler for textarea change
   const handleTextareaChange = (value) => {
     setTextareaValue(value);
+  
+    // Split the textarea value by "|" and set the options for the select component
+    const options = value.split('|').map((item) => item.trim());
+    setSelectOptions(options);
+  
+    // If the current normalValue is not in the options, reset it to an empty string
+    if (!options.includes(normalValue)) {
+      setNormalValue('');
+    }
   };
   useEffect(() => {
     axios.get(urlGetAllServices).then((response) => {
@@ -132,7 +142,9 @@ export default function Services() {
     // PatientType: '',
     Status: true,
     Price: 0.00,
-    Textarea: ''
+    Textarea: '',
+    normalValue: '',
+    LabUom:''
   });
 
   const classes = useStyles();
@@ -153,6 +165,7 @@ export default function Services() {
     { field: 'Price', headerName: 'Price', flex: 1 }
   ];
 
+
   return (
     <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
       <Grid container width={'100%'}>
@@ -163,7 +176,9 @@ export default function Services() {
                 initialValues={{ ...initialFormState }}
                 validationSchema={FORM_VALIDATION}
                 onSubmit={(values, { resetForm }) => {
-                  console.log(values);
+                  debugger;
+                  console.log(values,);
+                  console.log(normalValue,);
                   const postData = {
                     ServiceClassificationId: values.ServiceClassification,
                     ShortName: values.ServiceCode,
@@ -179,7 +194,9 @@ export default function Services() {
                     FacilityId: 1,
                     Qty: 1,
                     IsFromTestValues: values.IsFromTestValues,
-                    TestValues: textareaValue
+                    TestValues: textareaValue,
+                    NormalValForTestVal:normalValue,
+                    LabUOM:values.LabUom
                   };
 
                   axios
@@ -197,6 +214,7 @@ export default function Services() {
                         resetForm();
                         loadservices();
                         setTextareaValue('');
+                        setNormalValue('');
                         setSecondDropdownData([]);
                       } else {
                         alert('Invalid Login');
@@ -215,7 +233,7 @@ export default function Services() {
                       <Typography variant="h3">Add Service</Typography>
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select
+                      <Select1
                         style={{ width: '100%' }}
                         getOptionLabel={(option) => option.LookupDescription}
                         getOptionValue={(option) => option.LookupID}
@@ -230,7 +248,7 @@ export default function Services() {
                       />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select
+                      <Select1
                         style={{ width: '100%' }}
                         getOptionLabel={(option) => option.LongName}
                         getOptionValue={(option) => option.ServiceClassificationId}
@@ -257,7 +275,7 @@ export default function Services() {
                       />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select style={{ width: '100%' }}
+                      <Select1 style={{ width: '100%' }}
                         getOptionLabel={(option) => option.ShortName}
                         getOptionValue={(option) => option.UomId}
                         label={
@@ -268,7 +286,7 @@ export default function Services() {
                         name="Uom" options={patientDropdown.Uoms} />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select style={{ width: '100%' }} name="TestCategory" label="TestCategory"
+                      <Select1 style={{ width: '100%' }} name="TestCategory" label="TestCategory"
                         getOptionLabel={(option) => option.LookupDescription}
                         getOptionValue={(option) => option.LookupID}
                         options={patientDropdown.Category} />
@@ -291,20 +309,24 @@ export default function Services() {
                       </div>
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select style={{ width: '100%' }} name="ResultType"
+                      <Select1 style={{ width: '100%' }} name="ResultType"
                         getOptionLabel={(option) => option.LookupDescription}
                         getOptionValue={(option) => option.LookupID}
                         label="ResultType" options={patientDropdown.TestResultTypes} />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select style={{ width: '100%' }} name="SampleType" label="SampleType"
+                      <Select1 style={{ width: '100%' }} name="SampleType" label="SampleType"
                         getOptionLabel={(option) => option.LookupDescription}
                         getOptionValue={(option) => option.LookupID}
                         options={patientDropdown.SampleTypes} />
                     </Grid>
                     <Grid item xs={6} md={3}>
+                    <TextField1 name="LabUom" placeholder="Ex:Mg/dl" label="LabUom"/ >
+                    </Grid>
+                    <Grid item xs={6} md={3}>
                       <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <CheckboxWrapper name="IsFromTestValues" label="" legend="IsResult From Test Values?" />
+                        <CheckboxWrapper name="IsFromTestValues" label="" legend="IsResult From Test Values?"
+                        />
                       </div>
                     </Grid>
                     <Grid item xs={6} md={3}>
@@ -312,6 +334,26 @@ export default function Services() {
                         <label htmlFor="myTextarea">TestValues</label>
                         <Textarea value={textareaValue} onChange={handleTextareaChange} />
                       </div>
+                    </Grid>
+                    <Grid item xs={6} md={3}>
+                      <InputLabel htmlFor="normal-value">Select Normal Value</InputLabel>
+                      <Select
+                        style={{ width: '100%' }}
+                        name="normalValue"
+                        size='small'
+                        label="Select Normal Value"
+                        value={normalValue} // Use the normalValue state here
+                        onChange={(e) => setNormalValue(e.target.value)}
+                        inputProps={{
+                          id: 'normal-value',
+                        }}
+                      >
+                        {selectOptions.map((option, index) => (
+                          <MenuItem key={index} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </Select>
                     </Grid>
                     <Grid item xs={6} md={3}>
                       <TextField1 name="Price" label="Price" />
