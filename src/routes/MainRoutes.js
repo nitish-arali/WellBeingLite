@@ -17,20 +17,21 @@ const Laboratory = Loadable(lazy(() => import('views/Laboratory/Laboratory')));
 const Billing = Loadable(lazy(() => import('views/Billing/Billing')));
 const Master = Loadable(lazy(() => import('views/Master/Master')));
 const Services = Loadable(lazy(() => import('views/Services/Services')));
-const TemplateMaster =Loadable(lazy(() => import('views/TemplateMaster/TemplateMaster')));
-const SubTestMapping =Loadable(lazy(()=> import('views/SubTestMapping/SubTestMapping')));
-const TestMethod =Loadable(lazy(()=> import('views/TestMethod/TestMethod')));
-const TestReference =Loadable(lazy(()=> import('views/TestReference/TestReference')));
-const ContainerDefinitions =Loadable(lazy(()=> import('views/ContainerDefinitions/ContainerDefinitions')));
-const LabDashBoard =Loadable(lazy(()=> import('views/LabDashBoard/LabDashBoard')));
-const SamplecollectionSearch =Loadable(lazy(()=> import('views/SamplecollectionSearch/SamplecollectionSearch')));
-const ResultentrySearch =Loadable(lazy(()=> import('views/ResultentrySearch/ResultentrySearch')));
-const ResultentryIndex =Loadable(lazy(()=> import('views/ResultentryIndex/ResultentryIndex')));
-const SampleCollectionIndex =Loadable(lazy(()=> import('views/SampleCollectionIndex/SampleCollectionIndex')));
+const TemplateMaster = Loadable(lazy(() => import('views/TemplateMaster/TemplateMaster')));
+const SubTestMapping = Loadable(lazy(() => import('views/SubTestMapping/SubTestMapping')));
+const TestMethod = Loadable(lazy(() => import('views/TestMethod/TestMethod')));
+const TestReference = Loadable(lazy(() => import('views/TestReference/TestReference')));
+const ContainerDefinitions = Loadable(lazy(() => import('views/ContainerDefinitions/ContainerDefinitions')));
+const LabDashBoard = Loadable(lazy(() => import('views/LabDashBoard/LabDashBoard')));
+const SamplecollectionSearch = Loadable(lazy(() => import('views/SamplecollectionSearch/SamplecollectionSearch')));
+const ResultentrySearch = Loadable(lazy(() => import('views/ResultentrySearch/ResultentrySearch')));
+const ResultentryIndex = Loadable(lazy(() => import('views/ResultentryIndex/ResultentryIndex')));
+const SampleCollectionIndex = Loadable(lazy(() => import('views/SampleCollectionIndex/SampleCollectionIndex')));
 
+const NewPatient = Loadable(lazy(() => import('views/Patient/FormsUI/NewPatient')));
+const NewVisit = Loadable(lazy(() => import('views/Patient/FormsUI/NewVisit')));
 
-
-const MainRoutes = {  
+const MainRoutes = {
   path: '/',
   element: <MainLayout />,
   children: [
@@ -68,6 +69,14 @@ const MainRoutes = {
     {
       path: 'Master/:patientId/:encounterId',
       element: <Master />
+    },
+    {
+      path: 'NewPatient',
+      element: <NewPatient />
+    },
+    {
+      path: 'NewVisit',
+      element: <NewVisit />
     },
     {
       path: 'SampleCollectionIndex/:patientId/:encounterId/:labnumber',
@@ -163,7 +172,7 @@ const MainRoutes = {
       children: [
         {
           path: '/SamplecollectionSearch',
-          element: <SamplecollectionSearch  />
+          element: <SamplecollectionSearch />
         }
       ]
     },
@@ -172,12 +181,11 @@ const MainRoutes = {
       children: [
         {
           path: '/ResultentrySearch',
-          element: <ResultentrySearch  />
+          element: <ResultentrySearch />
         }
       ]
     },
 
- 
     {
       path: 'utils',
       children: [

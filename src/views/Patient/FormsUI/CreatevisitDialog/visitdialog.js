@@ -1,21 +1,22 @@
 // CreateVisitDialog.jsx
 //import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  Typography,
-  Grid
-} from '@mui/material';
-import Button from '../Button/index.js'
-//import PatientHeader from './PatientHeader';
-import PatientHeader from '../PatientHeader/index.js';
+import { Dialog, DialogContent, Typography, Grid } from '@mui/material';
+import Button from '../Button/index.js';
 import Select from '../Select/index.js';
 import CloseIcon from '@mui/icons-material/Cancel';
 import { Formik, Form } from 'formik';
 import { Container } from '@mui/system';
 import IconButton from '@mui/material/IconButton';
 import React, { useState, useEffect } from 'react';
-import { urlGetVisitDetailsWithPHeader, urlGetDepartmentBasedOnPatitentType, urlGetServiceLocationBasedonId, urlGetProviderBasedOnDepartment,urlAddNewVisit } from 'endpoints.ts';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {
+  urlGetVisitDetailsWithPHeader,
+  urlGetDepartmentBasedOnPatitentType,
+  urlGetServiceLocationBasedonId,
+  urlGetProviderBasedOnDepartment,
+  urlAddNewVisit
+} from 'endpoints.ts';
 import { useRef } from 'react';
 import customAxios from '../CustomAxios/index.js';
 import * as Yup from 'yup';
@@ -25,18 +26,15 @@ const FORM_VALIDATION1 = Yup.object().shape({
   PatientType: Yup.string().required('required'),
   Department: Yup.string().required('required'),
   Provider: Yup.string().required('required'),
-  ServiceLocation: Yup.string().required('required'),
+  ServiceLocation: Yup.string().required('required')
 });
 
 function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
-  debugger;
   const [initialFormState, setInitialFormState] = useState({
-
     PatientType: '',
     Department: '',
     Provider: '',
-    ServiceLocation: '',
-
+    ServiceLocation: ''
   });
 
   const handleClose = (e) => {
@@ -49,7 +47,6 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
       setSelectedDepartment('');
       setSelectedProvider('');
       setSelectedServiceLocation('');
-
     }
   };
 
@@ -63,12 +60,11 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
     setSelectedDepartment('');
     setSelectedProvider('');
     setSelectedServiceLocation('');
-   
   };
 
   const handleCrossIconClick = () => {
-   // setInitialFormState([]);
-   formikRef1.current.resetForm();
+    // setInitialFormState([]);
+    formikRef1.current.resetForm();
     // Handle the cross IconButton click logic here
     // Close the dialog or perform other actions
     onClose();
@@ -76,21 +72,16 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
     setSelectedDepartment('');
     setSelectedProvider('');
     setSelectedServiceLocation('');
-   
   };
   const fetchPatientDetails = async (patientId) => {
-  
     try {
       // Make an API call to fetch patient details using patientId
       const response = await customAxios.get(`${urlGetVisitDetailsWithPHeader}?PatientId=${patientId}`);
       if (response.status === 200) {
-
         const pttype = response.data.data.PatientType;
-
 
         // Assuming your API response structure matches the provided data
         setPatientTypes(pttype);
-
       } else {
         console.error('Failed to fetch patient details');
       }
@@ -114,10 +105,16 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
   const [selectedServiceLocation, setSelectedServiceLocation] = useState('');
   const [encounterId, setEncounterId] = useState(null);
   const formikRef1 = useRef(null);
+  const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState(false);
+
+  /* const handleSubmit = (values) => {
+    // Set the form submission state to true
+    setIsFormSubmitted(true);
+  }; */
+
   useEffect(() => {
     if (selectedPatientType) {
       fetchDept(selectedPatientType);
-
     } else {
       // Reset the department dropdown if no patient type is selected
       setDepartments([]);
@@ -126,7 +123,6 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
   }, [selectedPatientType]);
 
   const fetchDept = async (selectedPatientType) => {
-
     try {
       // Make an API call to fetch patient details using patientId
       const response = await customAxios.get(`${urlGetDepartmentBasedOnPatitentType}?PatientType=${selectedPatientType}`);
@@ -144,8 +140,6 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
   useEffect(() => {
     // Fetch data for the "provider" and "servicelocation" dropdowns when "selectedDepartment" changes
     if (selectedDepartment) {
-    
-
       fetchProvider(selectedDepartment);
       fetchServicelocation(selectedDepartment, selectedPatientType);
 
@@ -166,7 +160,6 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
   }, [selectedDepartment]);
 
   const fetchProvider = async (selectedDepartment) => {
-   
     try {
       // Make an API call to fetch patient details using patientId
       const response = await customAxios.get(`${urlGetProviderBasedOnDepartment}?DepartmentId=${selectedDepartment}`);
@@ -181,10 +174,11 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
     }
   };
   const fetchServicelocation = async (selectedDepartment, selectedPatientType) => {
-  
     try {
       // Make an API call to fetch patient details using patientId
-      const response = await customAxios.get(`${urlGetServiceLocationBasedonId}?DepartmentId=${selectedDepartment}&patienttype=${selectedPatientType}`);
+      const response = await customAxios.get(
+        `${urlGetServiceLocationBasedonId}?DepartmentId=${selectedDepartment}&patienttype=${selectedPatientType}`
+      );
       if (response.status === 200) {
         const serviceloc = response.data.data.ServiceLocation;
         setServiceLocations(serviceloc);
@@ -196,13 +190,7 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
     }
   };
 
-
-
- 
-
   // Handle form field changes and submit here
-
-
 
   // const handleClearForm1 = (event) => {
   //   if (event) {
@@ -217,82 +205,76 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
   //   formikRef1.current.resetForm();
   // };
   return (
-
-    <Dialog open={isOpen} onClose={handleClose} PaperProps={{
-      style: {
-        maxWidth: '800px',
-        height: '500px' // Set your desired custom max-width here
-      },
-    }}
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      PaperProps={{
+        style: {
+          maxWidth: '800px',
+          height: '500px' // Set your desired custom max-width here
+        }
+      }}
     >
       <DialogContent>
-
-
         <Grid container width={'100%'}>
           <Grid item xs={12}>
             <Container maxWidth="xlg">
-
               <Formik
-            
                 initialValues={{ ...initialFormState }}
                 validationSchema={FORM_VALIDATION1}
                 onSubmit={(values, { resetForm }) => {
-                  debugger;
                   //setLoading(true);
+                  setIsSaveButtonDisabled(true);
                   console.log(values);
-                
-                //  setLoading(true);
+
+                  //  setLoading(true);
                   console.log(values);
-                //  const formattedDate = formatDate(values.dob);
+                  //  const formattedDate = formatDate(values.dob);
                   const postData = {
                     PatientId: selectedRow.PatientId,
                     PatientType: values.PatientType,
                     FacilityDepartmentId: values.Department,
                     FacilityDepartmentServiceLocationId: values.ServiceLocation,
                     ProviderId: values.Provider
-                   
-
                   };
 
-                  customAxios.post(urlAddNewVisit, null,
-                    {
+                  customAxios
+                    .post(urlAddNewVisit, null, {
                       params: postData,
                       headers: {
-                        'Content-Type': 'application/json', // Replace with the appropriate content type if needed
+                        'Content-Type': 'application/json' // Replace with the appropriate content type if needed
                         // Add any other required headers here
-                      },
+                      }
                     })
-                    .then(response => {
+                    .then((response) => {
                       // Handle the response data here
 
                       console.log('Response:', response.data);
-                     // setLoading(false);
+                      // setLoading(false);
                       //alert(JSON.stringify(response.data));
                       if (response.data != null) {
                         const genen = response.data.data.EncounterModel.GeneratedEncounterId;
                         setEncounterId(genen);
+                        toast.success('Patient visit created Successfully');
+                      } else {
+                        alert('Invalid Login');
                       }
-                      else {
-                        alert("Invalid Login");
-                      }
-
                     })
-                    .catch(error => {
+                    .catch((error) => {
                       // Handle errors here
                       console.error('Error:', error);
-                    
+                      toast.error(' Something went wrong! ');
+
                       //navigate('/error')
                     });
-
-                }
-                }
+                  resetForm();
+                }}
                 innerRef={formikRef1}
               >
                 {() => (
                   <Form>
                     <Grid container spacing={2}>
                       <Grid item xs={12}>
-
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                           <IconButton edge="end" color="inherit" onClick={handleCrossIconClick}>
                             <CloseIcon />
@@ -350,7 +332,7 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
                         />
                       </Grid>
                       <Grid item xs={6} md={6}>
-                        <Select        
+                        <Select
                           label={
                             <span>
                               Service Location <span style={{ color: 'red', paddingLeft: '2px' }}>*</span>
@@ -365,29 +347,33 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
                         />
                       </Grid>
 
-
                       {/* Repeat the above Field block for other form fields */}
-                      <Grid item xs={8}>
-                      </Grid>
+                      <Grid item xs={8}></Grid>
+
                       <Grid item xs={2} justifyContent={'end'}>
-                        <Button style={{ width: '80%' }}>Save</Button>
+                        <Button style={{ width: '80%' }} isDisabled={isSaveButtonDisabled} type="submit">
+                          Save
+                        </Button>
                       </Grid>
+
                       <Grid item xs={2} justifyContent={'end'}>
                         <button
                           style={{
-                            backgroundColor: "#2196F3",
-                            color: "#fff",
+                            backgroundColor: '#2196F3',
+                            color: '#fff',
                             fontFamily: "'Roboto',sans-serif",
-                            fontSize: "0.875rem",
-                            lineHeight: "1.75",
-                            minWidth: "64px",
-                            padding: "6px 16px",
-                            transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                            boxShadow: "0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)",
-                            width: "80%",
-                            fontWeight: "500",
-                            borderRadius: "4px",
-                            border: "none",
+                            fontSize: '0.875rem',
+                            lineHeight: '1.75',
+                            minWidth: '64px',
+                            padding: '6px 16px',
+                            transition:
+                              'background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+                            boxShadow:
+                              '0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)',
+                            width: '80%',
+                            fontWeight: '500',
+                            borderRadius: '4px',
+                            border: 'none'
                           }}
                           type="button"
                           onClick={handleCancelClick}
@@ -396,7 +382,6 @@ function CreateVisitDialog({ isOpen, onClose, selectedRow }) {
                         </button>
                       </Grid>
                       {/* <Button onClick={handleAddPatientClick} >Add Patient</Button> */}
-
                     </Grid>
                   </Form>
                 )}
