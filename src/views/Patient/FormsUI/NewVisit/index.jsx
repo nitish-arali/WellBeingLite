@@ -200,7 +200,9 @@ const NewVisit = () => {
     // Navigate to the new URL
     navigate(url);
   };
+  const getOptionLabel = (option) => option.UhId;
 
+  const isOptionEqualToValue = (option, value) => option.UhId === value.UhId;
   return (
     <Box>
       <Grid container width={'100%'}>
@@ -237,11 +239,14 @@ const NewVisit = () => {
                       <CustomAutocomplete
                         id="uhid-autocomplete"
                         label="UHID"
+                        name="Uhid"
                         options={options}
                         value={selectedUhId}
                         onInputChange={handleInputChange}
                         onChange={handleAutocompleteChange}
                         fetchOptionsCallback={fetchOptionsCallback}
+                        getOptionLabel={getOptionLabel}
+                        isOptionEqualToValue={isOptionEqualToValue}
                       />
                     </Grid>
                     <Grid item xs={6} md={3}>

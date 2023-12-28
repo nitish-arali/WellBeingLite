@@ -155,7 +155,9 @@ function ResultentrySearch() {
     getlabnumber(selectedVisit);
   };
 
+  const getOptionLabel = (option) => option.UhId;
 
+  const isOptionEqualToValue = (option, value) => option.UhId === value.UhId;
  
   return (
     <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
@@ -174,14 +176,18 @@ function ResultentrySearch() {
                     </Grid>
                     <Grid item xs={6} md={3}>
                       {/* <TextField name="Uhid" label="Uhid" /> */}
-                      <CustomAutocomplete
+                     
+                         <CustomAutocomplete
                         id="uhid-autocomplete"
                         label="UHID"
+                        name="Uhid"
                         options={options}
                         value={selectedUhId}
                         onInputChange={handleInputChange}
                         onChange={handleAutocompleteChange}
                         fetchOptionsCallback={fetchOptionsCallback}
+                        getOptionLabel={getOptionLabel}
+                        isOptionEqualToValue={isOptionEqualToValue}
                       />
                     </Grid>
                     <Grid item xs={6} md={3}>

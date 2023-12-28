@@ -149,6 +149,10 @@ function LabDashboard() {
     // marginBottom: '5px',
   };
   const { loaderLoading, startLoading, stopLoading } = useLoader();
+
+  const getOptionLabel = (option) => option.UhId;
+
+  const isOptionEqualToValue = (option, value) => option.UhId === value.UhId;
   return (
     <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
       <Grid container width={'100%'}>
@@ -166,11 +170,14 @@ function LabDashboard() {
                       <CustomAutocomplete
                         id="uhid-autocomplete"
                         label="UHID"
+                        name="Uhid"
                         options={options}
                         value={selectedUhId}
                         onInputChange={handleInputChange}
                         onChange={handleAutocompleteChange}
                         fetchOptionsCallback={fetchOptionsCallback}
+                        getOptionLabel={getOptionLabel}
+                        isOptionEqualToValue={isOptionEqualToValue}
                       />
                     </Grid>
                     <Grid item xs={6} md={3}>
