@@ -144,6 +144,10 @@ const SampleCollectionIndex = () => {
       const url = `/ResultentryIndex/${patientId}/${encounterId}/${labnumber}`;
       navigate(url);
     }
+  else  if (tab == 'Verification') {
+      const url = `/VerificationIndex/${patientId}/${encounterId}/${labnumber}`;
+      navigate(url);
+    }
   };
 
   const encounterId1 = 0;
