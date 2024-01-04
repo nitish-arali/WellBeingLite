@@ -406,7 +406,6 @@ function TestReference() {
                             <TextField1 name="ToAge" label="ToAge" numeric />
                           </Grid>
                           <Grid item xs={1}></Grid>
-
                           <Grid item xs={6} md={2}>
                             <CustomSelect
                               name="Operators"
