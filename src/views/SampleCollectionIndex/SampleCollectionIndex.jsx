@@ -23,6 +23,7 @@ import Select from 'views/Patient/FormsUI/Select';
 import { useNavigate } from 'react-router';
 import { makeStyles } from '@mui/styles';
 import TextField1 from 'views/Patient/FormsUI/Textfield/index.js';
+import TablePagination from '@mui/material/TablePagination';
 const CustomCheckbox = ({ checked, onChange }) => <input type="checkbox" checked={checked} onChange={onChange} />;
 const SampleCollectionIndex = () => {
   const { patientId, encounterId, labnumber } = useParams();
@@ -99,7 +100,7 @@ const SampleCollectionIndex = () => {
   };
   const useStyles = makeStyles((theme) => ({
     formWrapper: {
-      marginTop: theme.spacing(5),
+      marginTop: theme.spacing(2),
       marginBottom: theme.spacing(8)
     }
   }));
@@ -152,152 +153,203 @@ const SampleCollectionIndex = () => {
 
   const encounterId1 = 0;
   return (
-    <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
+    <Box
+      sx={{ width: '100%', backgroundColor: 'white', padding: '0', border: '2px solid #ccc', borderRadius: '10px', paddingBottom: '10px' }}
+    >
       <Grid container width={'100%'}>
         <Grid item xs={12}>
-          <Container maxWidth="xlg">
-            <div className={classes.formWrapper}>
-              <Formik
-                initialValues={{ ...initialFormState }}
-                // validationSchema={FORM_VALIDATION}
-                onSubmit={async (values, { resetForm }) => {
-                  debugger;
-                  console.log('Form values:', values);
-                  console.log('Selected rows:', selectedRows);
+          <Typography
+            variant="h4"
+            sx={{ backgroundColor: '#1E88E5', color: 'white', padding: '12px', borderRadius: '10px', fontSize: '20px', fontWeight: '400' }}
+          >
+            Sample Collection
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sx={{ marginRight: '16px' }}>
+          <div className={classes.formWrapper}>
+            <Formik
+              initialValues={{ ...initialFormState }}
+              // validationSchema={FORM_VALIDATION}
+              onSubmit={async (values, { resetForm }) => {
+                debugger;
+                console.log('Form values:', values);
+                console.log('Selected rows:', selectedRows);
 
-                  const updatedSelectedRowsData = selectedRows
-                    .filter((row) => !row.IsSampleCollected) // Filter out rows where IsSampleCollected is true
-                    .map((row) => ({
-                      ...row,
-                      ...values
-                    }));
-                  // Assuming your API endpoint is something like this
-                  if (updatedSelectedRowsData.length == 0) {
-                    toast.warning('SampleCollection Is Done For All Tests.. ');
-                  } else {
-                    const apiUrl = urlSaveSampleColResult;
-                    try {
-                      // Make an asynchronous Axios POST request to your API
-                      const response = await customAxios.post(apiUrl, updatedSelectedRowsData);
+                const updatedSelectedRowsData = selectedRows
+                  .filter((row) => !row.IsSampleCollected) // Filter out rows where IsSampleCollected is true
+                  .map((row) => ({
+                    ...row,
+                    ...values
+                  }));
+                // Assuming your API endpoint is something like this
+                if (updatedSelectedRowsData.length == 0) {
+                  toast.warning('SampleCollection Is Done For All Tests.. ');
+                } else {
+                  const apiUrl = urlSaveSampleColResult;
+                  try {
+                    // Make an asynchronous Axios POST request to your API
+                    const response = await customAxios.post(apiUrl, updatedSelectedRowsData);
 
-                      console.log('API response:', response.data);
+                    console.log('API response:', response.data);
 
-                      if (response.data.data.Status !== '') {
-                        var message = response.data.data.Status;
-                        if (message.includes('Sample Collection Saved Successfully.')) {
-                          fetchChargeDetails();
-                          toast.success(message);
-                        } else {
-                          toast.warning(message);
-                        }
+                    if (response.data.data.Status !== '') {
+                      var message = response.data.data.Status;
+                      if (message.includes('Sample Collection Saved Successfully.')) {
+                        fetchChargeDetails();
+                        toast.success(message);
+                      } else {
+                        toast.warning(message);
                       }
-                      // Handle success if needed
-                    } catch (error) {
-                      console.error('API error:', error);
-                      // Handle error if needed
                     }
+                    // Handle success if needed
+                  } catch (error) {
+                    console.error('API error:', error);
+                    // Handle error if needed
                   }
-                }}
-              >
-                <Form>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Typography variant="h3">SampleCollection</Typography>
-
-                      <Grid container spacing={2}>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('SampleCollection')}>
-                            Sample Collection
-                          </MuiButton>
+                }
+              }}
+            >
+              <Form>
+                <div style={{ border: '2px solid #ccc', padding: '10px', marginLeft: '16px', borderRadius: '5px' }}>
+                  <Grid item xs={12} marginX={'5px'} borderRadius={'10px'}>
+                    <div>
+                      <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
+                    </div>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Grid container spacing={2} marginLeft={'-10px'}>
+                      <Grid item>
+                        <MuiButton variant="contained" onClick={() => handleButtonClick('SampleCollection')}>
+                          Sample Collection
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('ResultEntry')}>
+                          Result Entry
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('Verification')}>
+                          Verification
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('Report')}>
+                          Report
+                        </MuiButton>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        // width: '100%',
+                        '& .super-app-theme--header': {
+                          backgroundColor: 'rgba(0, 123, 255, 0.8)',
+                          color: 'white', // Set the font color to white or any other color you prefer
+                          fontWeight: 'bold' // Optionally, you can set the font weight
+                        }
+                      }}
+                    >
+                      <TableContainer component={Paper}>
+                        <DataGrid
+                          rows={chargeDetails}
+                          columns={columns}
+                          disableColumnFilter
+                          getRowClassName={(params) => {
+                            return params.row.IsSampleCollected ? 'highlight' : '';
+                          }}
+                          getRowId={(row) => row.SmpColHeaderId}
+                          getRowHeight={() => 40} // Set the desired height here
+                          columnHeaderHeight={40}
+                          sx={{
+                            marginLeft: '4px',
+                            marginRight: '4px',
+                            marginTop: '10px',
+                            '.highlight': {
+                              bgcolor: 'green',
+                              color: 'white',
+                              fontWeight: 'bold',
+                              '&:hover': {
+                                bgcolor: 'green'
+                              }
+                            },
+                            '& .MuiDataGrid-cell': {
+                              border: '1px solid #ccc',
+                              borderBottom: '1px solid #ccc'
+                            },
+                            '& .MuiDataGrid-columnHeader': {
+                              borderLeft: '1px solid #ccc',
+                              borderTop: '1px solid #ccc'
+                            }
+                          }}
+                          disableColumnSelector
+                          hideFooterPagination
+                          hideFooter
+                          disableDensitySelector
+                          disableRowSelectionOnClick
+                          disablePagination
+                          slots={{ toolbar: GridToolbar }}
+                          slotProps={{
+                            toolbar: {
+                              showQuickFilter: false,
+                              quickFilterProps: { debounceMs: 500 },
+                              printOptions: { disableToolbarButton: true },
+                              csvOptions: { disableToolbarButton: true }
+                            }
+                          }}
+                        />
+                      </TableContainer>
+                      {/* <Grid item xs={6}></Grid>
+                    <Grid item xs={5}></Grid> */}
+                      <Grid
+                        container
+                        spacing={2}
+                        sx={{
+                          // padding: '10px',
+                          marginLeft: '0px',
+                          marginTop: '0px',
+                          paddingBottom: '20px',
+                          // width: '100%',
+                          // border: '1px solid #ccc',
+                          // borderRadius: '5px',
+                          // marginLeft: '18px',
+                          marginRight: '0%'
+                        }}
+                      >
+                        <Grid item xs={2}>
+                          <TextField1 name="Container1" label="Container1" />
                         </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('ResultEntry')}>
-                            Result Entry
-                          </MuiButton>
+                        <Grid item xs={2}>
+                          <TextField1 name="Container2" label="Container2" />
                         </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('Verification')}>
-                            Verification
-                          </MuiButton>
+                        <Grid item xs={2}>
+                          <TextField1 name="Container3" label="Container3" />
                         </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('Report')}>
-                            Report
+                        <Grid item xs={2}>
+                          <TextField1 name="Container4" label="Container4" />
+                        </Grid>
+                        <Grid item xs={2}>
+                          <TextField1 name="Container5" label="Container5" />
+                        </Grid>
+                        <Grid item xs={1.8}>
+                          <TextField1 name="Container6" label="Container6" />
+                        </Grid>
+                      </Grid>
+                      <Grid container display={'flex'} justifyContent={'end'} marginTop={1}>
+                        <Grid item xs={8}></Grid>
+                        <Grid item xs={2}>
+                          <MuiButton type="submit" style={{ width: '100%' }} variant="contained" color="primary">
+                            Submit
                           </MuiButton>
                         </Grid>
                       </Grid>
-
-                      <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{
-                          height: 250,
-                          width: '100%',
-                          '& .super-app-theme--header': {
-                            backgroundColor: 'rgba(0, 123, 255, 0.8)',
-                            color: 'white', // Set the font color to white or any other color you prefer
-                            fontWeight: 'bold' // Optionally, you can set the font weight
-                          }
-                        }}
-                      >
-                        <TableContainer component={Paper}>
-                          <div>
-                            <DataGrid
-                              rows={chargeDetails}
-                              columns={columns}
-                              pageSize={5}
-                              disableColumnFilter
-                              getRowClassName={(params) => {
-                                return params.row.IsSampleCollected ? 'highlight' : '';
-                              }}
-                              sx={{
-                                '.highlight': {
-                                  bgcolor: 'green',
-                                  color: 'white', // Set the font color to white or any other color you prefer
-                                  fontWeight: 'bold', // Optionally, you can set the font weight
-                                  '&:hover': {
-                                    bgcolor: 'green'
-                                  }
-                                }
-                              }}
-                              disableColumnSelector
-                              disableDensitySelector
-                              disableRowSelectionOnClick
-                              slots={{ toolbar: GridToolbar }}
-                              getRowId={(row) => row.SmpColHeaderId}
-                              slotProps={{
-                                toolbar: {
-                                  showQuickFilter: true,
-                                  quickFilterProps: { debounceMs: 500 },
-                                  printOptions: { disableToolbarButton: true },
-                                  csvOptions: { disableToolbarButton: true }
-                                }
-                              }}
-                            />
-                          </div>
-                        </TableContainer>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField1 name="Container1" label="Container1" />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField1 name="Container2" label="Container2" />
-                    </Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2} textAlign={'end'}>
-                      <Button type="submit" style={{ width: '100%' }}>
-                        Submit
-                      </Button>
-                    </Grid>
+                    </Box>
                   </Grid>
-                </Form>
-              </Formik>
-            </div>
-          </Container>
+                </div>
+              </Form>
+            </Formik>
+          </div>
         </Grid>
       </Grid>
     </Box>

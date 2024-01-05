@@ -41,12 +41,9 @@ export default function Services() {
     templateListmodel:[]
   });
 
-
-
   const Status = [
     { id: 'true', name: 'Active' },
-    { id: 'false', name: 'Hidden' },
-
+    { id: 'false', name: 'Hidden' }
   ];
 
   const [selectedValue, setSelectedValue] = useState('');
@@ -62,19 +59,18 @@ export default function Services() {
 
   const [serviceDetails, setServiceDetails] = useState([]);
 
-
   const [textareaValue, setTextareaValue] = useState('');
   const [selectOptions, setSelectOptions] = useState([]);
   const [normalValue, setNormalValue] = useState(''); // Set an initial value here
-  
+
   // Handler for textarea change
   const handleTextareaChange = (value) => {
     setTextareaValue(value);
-  
+
     // Split the textarea value by "|" and set the options for the select component
     const options = value.split('|').map((item) => item.trim());
     setSelectOptions(options);
-  
+
     // If the current normalValue is not in the options, reset it to an empty string
     if (!options.includes(normalValue)) {
       setNormalValue('');
@@ -91,7 +87,6 @@ export default function Services() {
       setServiceDetails(response.data.data.Services);
     });
   };
-
 
   const fetchServiceClassificationOptions = async (selectedValue) => {
     try {
@@ -142,10 +137,10 @@ export default function Services() {
     SampleType: '',
     // PatientType: '',
     Status: true,
-    Price: 0.00,
+    Price: 0.0,
     Textarea: '',
     normalValue: '',
-    LabUom:''
+    LabUom: ''
   });
 
   const classes = useStyles();
@@ -156,16 +151,14 @@ export default function Services() {
     ServiceCode: Yup.string().required('required'),
     ServiceName: Yup.string().required('required'),
     Uom: Yup.string().required('required'),
-    Status: Yup.string().required('required'),
+    Status: Yup.string().required('required')
   });
 
   const columns = [
-
     { field: 'ShortName', headerName: 'ShortName', flex: 1 },
     { field: 'LongName', headerName: 'LongName', flex: 1 },
     { field: 'Price', headerName: 'Price', flex: 1 }
   ];
-
 
   return (
     <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
@@ -178,8 +171,8 @@ export default function Services() {
                 validationSchema={FORM_VALIDATION}
                 onSubmit={(values, { resetForm }) => {
                   debugger;
-                  console.log(values,);
-                  console.log(normalValue,);
+                  console.log(values);
+                  console.log(normalValue);
                   const postData = {
                     ServiceClassificationId: values.ServiceClassification,
                     ShortName: values.ServiceCode,
@@ -268,7 +261,8 @@ export default function Services() {
                       <TextField1 name="ServiceCode" label="ServiceCode" />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <TextField1 name="ServiceName"
+                      <TextField1
+                        name="ServiceName"
                         label={
                           <span>
                             ServiceName<span style={{ color: 'red', paddingLeft: '2px' }}>*</span>
@@ -277,7 +271,8 @@ export default function Services() {
                       />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select1 style={{ width: '100%' }}
+                      <Select1
+                        style={{ width: '100%' }}
                         getOptionLabel={(option) => option.ShortName}
                         getOptionValue={(option) => option.UomId}
                         label={
@@ -285,22 +280,22 @@ export default function Services() {
                             Uom <span style={{ color: 'red', paddingLeft: '2px' }}>*</span>
                           </span>
                         }
-                        name="Uom" options={patientDropdown.Uoms} />
+                        name="Uom"
+                        options={patientDropdown.Uoms}
+                      />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select1 style={{ width: '100%' }} name="TestCategory" label="TestCategory"
+                      <Select1
+                        style={{ width: '100%' }}
+                        name="TestCategory"
+                        label="TestCategory"
                         getOptionLabel={(option) => option.LookupDescription}
                         getOptionValue={(option) => option.LookupID}
-                        options={patientDropdown.Category} />
+                        options={patientDropdown.Category}
+                      />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <CustomSelect
-                        name="Status"
-                        options={Status}
-                        valueProp="id"
-                        labelProp="name"
-                        label="Status"
-                      />
+                      <CustomSelect name="Status" options={Status} valueProp="id" labelProp="name" label="Status" />
                     </Grid>
                     <Grid item xs={6} md={3}>
                       <CheckboxWrapper name="IsSubtest" label="IsSubtest?" legend="TestType" />
@@ -311,7 +306,9 @@ export default function Services() {
                       </div>
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select1 style={{ width: '100%' }} name="ResultType"
+                      <Select1
+                        style={{ width: '100%' }}
+                        name="ResultType"
                         getOptionLabel={(option) => option.LookupDescription}
                         getOptionValue={(option) => option.LookupID}
                         label="ResultType" options={patientDropdown.TestResultTypes}
@@ -325,18 +322,21 @@ export default function Services() {
                         label="Templates" options={patientDropdown.templateListmodel} />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                      <Select1 style={{ width: '100%' }} name="SampleType" label="SampleType"
+                      <Select1
+                        style={{ width: '100%' }}
+                        name="SampleType"
+                        label="SampleType"
                         getOptionLabel={(option) => option.LookupDescription}
                         getOptionValue={(option) => option.LookupID}
-                        options={patientDropdown.SampleTypes} />
+                        options={patientDropdown.SampleTypes}
+                      />
                     </Grid>
                     <Grid item xs={6} md={3}>
-                    <TextField1 name="LabUom" placeholder="Ex:Mg/dl" label="LabUom"/ >
+                      <TextField1 name="LabUom" placeholder="Ex:Mg/dl" label="LabUom" />
                     </Grid>
                     <Grid item xs={6} md={3}>
                       <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <CheckboxWrapper name="IsFromTestValues" label="" legend="IsResult From Test Values?"
-                        />
+                        <CheckboxWrapper name="IsFromTestValues" label="" legend="IsResult From Test Values?" />
                       </div>
                     </Grid>
                     <Grid item xs={6} md={3}>
@@ -350,12 +350,12 @@ export default function Services() {
                       <Select
                         style={{ width: '100%' }}
                         name="normalValue"
-                        size='small'
+                        size="small"
                         label="Select Normal Value"
                         value={normalValue} // Use the normalValue state here
                         onChange={(e) => setNormalValue(e.target.value)}
                         inputProps={{
-                          id: 'normal-value',
+                          id: 'normal-value'
                         }}
                       >
                         {selectOptions.map((option, index) => (
@@ -370,7 +370,9 @@ export default function Services() {
                     </Grid>
                     <Grid item xs={10}></Grid>
                     <Grid item xs={2} textAlign={'end'}>
-                      <Button type="submit" style={{ width: '100%' }}>Submit</Button>
+                      <Button type="submit" style={{ width: '100%' }}>
+                        Submit
+                      </Button>
                     </Grid>
                   </Grid>
                 </Form>
@@ -380,13 +382,13 @@ export default function Services() {
         </Grid>
       </Grid>
       <TableContainer component={Paper}>
-        <div >
+        <div>
           <DataGrid
             rows={serviceDetails}
             columns={columns}
             initialState={{
               ...serviceDetails.initialState,
-              pagination: { paginationModel: { pageSize: 5 } },
+              pagination: { paginationModel: { pageSize: 5 } }
             }}
             pageSizeOptions={[5, 10, 25]}
             disableColumnFilter
@@ -398,16 +400,15 @@ export default function Services() {
             style={{
               border: '1px solid #ddd',
               borderRadius: '5px',
-              boxShadow: '0px 2px 6px #aaa',
+              boxShadow: '0px 2px 6px #aaa'
             }}
             slotProps={{
               toolbar: {
                 showQuickFilter: true,
                 quickFilterProps: { debounceMs: 500 },
                 printOptions: { disableToolbarButton: true },
-                csvOptions: { disableToolbarButton: true },
-
-              },
+                csvOptions: { disableToolbarButton: true }
+              }
             }}
           />
         </div>

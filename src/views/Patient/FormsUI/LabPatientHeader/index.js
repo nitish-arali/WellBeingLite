@@ -15,10 +15,14 @@ import React, { useState } from 'react';
 import BiotechIcon from '@mui/icons-material/Biotech';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import MuiButton from '@mui/material/Button';
+import Link from '@mui/material/Link';
 import { useNavigate } from 'react-router';
-function LabPatientHeader({ patientdata, 
-  // encounterId 
-
+import AllDone from '@mui/icons-material/CheckCircleTwoTone';
+import PartiallyDone from '@mui/icons-material/ControlPointTwoTone';
+import NotDone from '@mui/icons-material/RemoveCircleTwoTone';
+function LabPatientHeader({
+  patientdata
+  // encounterId
 }) {
   // debugger;
   function showGenderPic(patientdata) {
@@ -76,8 +80,6 @@ function LabPatientHeader({ patientdata,
     // Handle the "Edit Reg Details" action here
     handleMenuClose();
   };
-
-
 
   function formatDate(dateString) {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -153,104 +155,152 @@ function LabPatientHeader({ patientdata,
   // const en3 = patientdata?.GeneratedEncounterId;
 
   const patientContent = (
-    <Grid container spacing={2} alignItems="center" justifyContent={'center'}>
-      <Grid item xs={1}>
-        <Avatar src={showGenderPic(patientdata)} sx={{ width: 60, height: 60 }} />
-      </Grid>
-      <Grid item xs={2} sx={{ padding: '8px' }}>
-        <Typography variant="body2" sx={{ marginBottom: '8px' }}>
-          <span style={{ fontWeight: '700' }}>UhId:</span> {patientdata?.UhId || 'N/A'}
-        </Typography>
+    <>
+      <Grid container xs={10} spacing={1} alignItems="center" justifyContent={'start '}>
+        <Grid item xs={1}>
+          <Avatar src={showGenderPic(patientdata)} sx={{ width: 60, height: 60 }} />
+        </Grid>
+        <Grid item xs={2} sx={{ padding: '8px' }}>
+          <Typography variant="body2" sx={{ marginBottom: '8px' }}>
+            <span style={{ fontWeight: '700' }}>UhId:</span> {patientdata?.UhId || 'N/A'}
+          </Typography>
+          <Typography variant="body2">
+            <span style={{ fontWeight: '700' }}>VisitId:</span> {patientdata?.Encounter || 'N/A'}
+          </Typography>
+        </Grid>
 
-        <Typography variant="body2">
-          <span style={{ fontWeight: '700' }}>VisitId:</span> {patientdata?.Encounter || 'N/A'}
-        </Typography>
-      </Grid>
-     
-      <Grid item xs={3} sx={{ padding: '8px' }}>
-        <Typography variant="body1" sx={{ marginBottom: '8px' }}>
-          <span style={{ fontWeight: '700' }}>{patientdata?.PatientFullName || 'N/A'}</span>
-        </Typography>
-        <Typography variant="body2">{age}</Typography>
-      </Grid>
-      <Grid item xs={2} sx={{ padding: '8px' }}>
-        <Typography variant="body2" sx={{ marginBottom: '8px' }}>
-          <span style={{ fontWeight: '700' }}>OrderedDate:</span> {OrederDate}
-        </Typography>
-      </Grid>
-      <Grid item xs={2} sx={{ padding: '8px' }}>
-        <Typography variant="body2" sx={{ marginBottom: '8px' }}>
-          {showGender(patientdata)}
-        </Typography>
-        <Typography variant="body2">{dateOfBirth}</Typography>
-      </Grid>
-      <Grid item xs={2} sx={{ padding: '8px', display: 'flex', justifyContent: 'space-around' }}>
-        <IconButton aria-label="more" aria-controls="patient-menu" aria-haspopup="true" onClick={handleMenuClick}>
-          <MoreVertIcon fontSize="large" />
-        </IconButton>
-        <Menu id="patient-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
-          <MenuItem onClick={SampleCollection}>Sample Collection</MenuItem>
-          <MenuItem onClick={ResultEntry}>ResultEntry</MenuItem>
-          <MenuItem onClick={Verification}>Verification</MenuItem>
-        </Menu>
-      </Grid>
-      <Divider sx={{ width: '100%' }} />
-      <Grid item xs={1.5}>
-        <Typography variant="body2">
-          <span style={{ fontWeight: '700' }}></span> {patientdata?.PatientType || 'N/A'}
-          {/* <Chip label={patientdata?.PatientTypeName || 'N/A'} size="small" color="primary" /> */}
-        </Typography>
-      </Grid>
-      <Grid item xs={2.5} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-        <Typography variant="body2">
-          <span style={{ fontWeight: '700' }}>Lab Technician</span>
-        </Typography>
-        {/* <Typography variant="body2">
+        <Grid item xs={2} sx={{ padding: '8px' }}>
+          <Typography variant="body1" sx={{ marginBottom: '8px' }}>
+            <span style={{ fontWeight: '700' }}>{patientdata?.PatientFullName || 'N/A'}</span>
+          </Typography>
+          <Typography variant="body2">{age}</Typography>
+        </Grid>
+        <Grid item xs={3} sx={{ padding: '8px' }}>
+          <Typography variant="body2" sx={{ marginBottom: '8px' }}>
+            <span style={{ fontWeight: '700' }}>OrderedDate:</span> {OrederDate}
+          </Typography>
+        </Grid>
+        <Grid item xs={2} sx={{ padding: '8px' }}>
+          <Typography variant="body2" sx={{ marginBottom: '8px' }}>
+            {showGender(patientdata)}
+          </Typography>
+          <Typography variant="body2">{dateOfBirth}</Typography>
+        </Grid>
+        <Grid
+          item
+          xs={2}
+          sx={{ padding: '1px', display: 'flex', justifyContent: 'space-between', flexDirection: 'column', alignItems: 'start' }}
+        ></Grid>
+        <Divider sx={{ width: '95%' }} />
+        <Grid item xs={1}></Grid>
+        <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'start', alignItems: 'start' }}>
+          <Typography variant="body2">
+            <span style={{ fontWeight: '700' }}></span> {patientdata?.PatientType || 'N/A'}
+            {/* <Chip label={patientdata?.PatientTypeName || 'N/A'} size="small" color="primary" /> */}
+          </Typography>
+        </Grid>
+        <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'start', alignItems: 'start', flexDirection: 'column' }}>
+          <Typography variant="body2">
+            <span style={{ fontWeight: '700' }}>Lab Technician</span>
+          </Typography>
+          {/* <Typography variant="body2">
           <span style={{ fontWeight: '400' }}> {patientdata?.ProviderName || 'N/A'}</span>
         </Typography> */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <BiotechIcon />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <BiotechIcon />
+            <Typography variant="body2">
+              <span style={{ fontWeight: '300' }}>To Check Up</span>
+            </Typography>
+          </div>
+        </Grid>
+        <Grid item xs={3} sx={{ flexDirection: 'column' }}>
           <Typography variant="body2">
-            <span style={{ fontWeight: '300' }}>To Check Up</span>
+            <span style={{ fontWeight: '700' }}>LabNumber:</span> {patientdata?.LabNumber || 'N/A'}
           </Typography>
-        </div>
+          <Typography variant="body2">
+            <span style={{ fontWeight: '700' }}>BillStatus:</span> {patientdata?.BillStatus || 'N/A'}
+          </Typography>
+        </Grid>
+        <Grid item xs={3} sx={{ flexDirection: 'column' }}>
+          <Typography variant="body2">
+            <span style={{ fontWeight: '700' }}>Visited Date & Time</span>
+          </Typography>
+          {combinedDateTime ? <Chip label={combinedDateTime} size="small" color="primary" /> : 'N/A'}
+        </Grid>
       </Grid>
-      <Grid item xs={3} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-        <Typography variant="body2">
-          <span style={{ fontWeight: '700' }}>LabNumber:</span> {patientdata?.LabNumber || 'N/A'}
-        </Typography>
-        <Typography variant="body2">
-          <span style={{ fontWeight: '700' }}>BillStatus:</span> {patientdata?.BillStatus || 'N/A'}
-        </Typography>
+      <Grid container xs={2}>
+        <Grid item xs={10} display={'flex'} alignItems="start" fontSize={'16px'} justifyContent={'space-evenly'} flexDirection={'column'}>
+          <Link
+            component={patientdata.IsAllSampleCollected ? '' : 'button'}
+            underline={patientdata.IsAllSampleCollected ? 'none' : 'hover'}
+            onClick={patientdata.IsAllSampleCollected ? '' : SampleCollection}
+            sx={{ marginBottom: '10px', color: patientdata.IsAllSampleCollected ? 'grey' : '#2196F3' }}
+          >
+            Sample Collection
+          </Link>
+          <Link
+            component={patientdata.IsAllResEntryDone ? '' : 'button'}
+            underline={patientdata.IsAllResEntryDone ? 'none' : 'hover'}
+            onClick={patientdata.IsAllResEntryDone ? '' : ResultEntry}
+            sx={{ marginBottom: '10px', color: patientdata.IsAllResEntryDone ? 'grey' : '#2196F3' }}
+          >
+            Result Entry
+          </Link>
+          <Link
+            component={patientdata.IsAllVerificationDone ? '' : 'button'}
+            underline={patientdata.IsAllVerificationDone ? 'none' : 'hover'}
+            onClick={patientdata.IsAllVerificationDone ? '' : Verification}
+            sx={{ marginBottom: '10px', color: patientdata.IsAllVerificationDone ? 'grey' : '#2196F3' }}
+          >
+            Verification
+          </Link>
+          <Link underline="none" color="grey" sx={{ marginBottom: '5px' }}>
+            Reports
+          </Link>
+        </Grid>
+        <Grid item xs={2}>
+          <div>
+            {(() => {
+              if (patientdata.IsAllSampleCollected) {
+                return <AllDone style={{ color: '#008000' }} />;
+              } else if (patientdata.IsSmpPartiallyCollected) {
+                return <PartiallyDone style={{ color: '#ED7D31' }} />;
+              } else {
+                return <NotDone style={{ color: '#994D1C' }} />;
+              }
+            })()}
+          </div>
+          <div>
+            {(() => {
+              if (patientdata.IsAllResEntryDone) {
+                return <AllDone style={{ color: '#008000' }} />;
+              } else if (patientdata.IsResEntryPartiallyDone) {
+                return <PartiallyDone style={{ color: '#FF6C22' }} />;
+              } else {
+                return <NotDone style={{ color: '#994D1C' }} />;
+              }
+            })()}
+          </div>
+          <div>
+            {(() => {
+              if (patientdata.IsAllVerificationDone) {
+                return <AllDone style={{ color: '#008000' }} />;
+              } else if (patientdata.IsVerificationPartiallyDone) {
+                return <PartiallyDone style={{ color: '#FF6C22' }} />;
+              } else {
+                return <NotDone style={{ color: '#994D1C' }} />;
+              }
+            })()}
+          </div>
+        </Grid>
       </Grid>
-      <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-        <Typography variant="body2">
-          <span style={{ fontWeight: '700' }}>Status</span>
-        </Typography>
-        <Chip label="Waiting" size="small" color="primary" sx={{ width: 'min-content' }} />
-      </Grid>
-      <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-        <Typography variant="body2">
-          <span style={{ fontWeight: '700' }}>Visited Date & Time</span>
-        </Typography>
-        {combinedDateTime ? <Chip label={combinedDateTime} size="small" color="primary" /> : 'N/A'}
-      </Grid>
-      <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-        <Typography variant="body2">
-          {/* <span style={{ fontWeight: '700' }}>Start Consultation</span> */}
-          <MuiButton variant="outlined" color='secondary' endIcon={<KeyboardDoubleArrowRightIcon />}>
-            Start Consultation
-          </MuiButton>
-        </Typography>
-        {/* {combinedDateTime ? <Chip label={combinedDateTime} size="small" color="primary" /> : 'N/A'} */}
-      </Grid>
-    </Grid>
+    </>
   );
 
   return (
     <Box
       width={'100%'}
-      height={'180px'}
+      height={'140px'}
       overflow={'hidden'}
       // border={2}
       // borderColor="#fff"

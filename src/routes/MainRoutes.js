@@ -13,7 +13,7 @@ const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
 const UtilsMaterialIcons = Loadable(lazy(() => import('views/utilities/MaterialIcons')));
 const UtilsTablerIcons = Loadable(lazy(() => import('views/utilities/TablerIcons')));
 const Patient = Loadable(lazy(() => import('views/Patient/Patient')));
-const Laboratory = Loadable(lazy(() => import('views/Laboratory/Laboratory')));
+// const Laboratory = Loadable(lazy(() => import('views/Laboratory/Laboratory')));
 const Billing = Loadable(lazy(() => import('views/Billing/Billing')));
 const Master = Loadable(lazy(() => import('views/Master/Master')));
 const Services = Loadable(lazy(() => import('views/Services/Services')));
@@ -105,6 +105,15 @@ const MainRoutes = {
         }
       ]
     },
+    // {
+    //   path: 'laboratory',
+    //   children: [
+    //     {
+    //       path: 'laboratory',
+    //       element: <Laboratory />
+    //     }
+    //   ]
+    // },
     {
       path: 'billing',
       children: [
