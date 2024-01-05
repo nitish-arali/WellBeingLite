@@ -95,25 +95,6 @@ const MainRoutes = {
       path: 'ShowTemplate/:Tid',
       element: <ShowTemplate />
     },
-    
-    {
-      path: 'laboratory',
-      children: [
-        {
-          path: 'laboratory',
-          element: <Laboratory />
-        }
-      ]
-    },
-    // {
-    //   path: 'laboratory',
-    //   children: [
-    //     {
-    //       path: 'laboratory',
-    //       element: <Laboratory />
-    //     }
-    //   ]
-    // },
     {
       path: 'billing',
       children: [
