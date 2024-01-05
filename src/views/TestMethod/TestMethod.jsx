@@ -31,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
 const FORM_VALIDATION = Yup.object().shape({
     MethodName: Yup.string().required('required'),
     Unit: Yup.string().required('required'),
-
 });
 
 function TestMethod() {

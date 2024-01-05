@@ -27,9 +27,10 @@ const SamplecollectionSearch = Loadable(lazy(() => import('views/Samplecollectio
 const ResultentrySearch = Loadable(lazy(() => import('views/ResultentrySearch/ResultentrySearch')));
 const ResultentryIndex = Loadable(lazy(() => import('views/ResultentryIndex/ResultentryIndex')));
 const SampleCollectionIndex = Loadable(lazy(() => import('views/SampleCollectionIndex/SampleCollectionIndex')));
-
+const VerificationIndex = Loadable(lazy(() => import('views/VerificationIndex/VerificationIndex')));
 const NewPatient = Loadable(lazy(() => import('views/Patient/FormsUI/NewPatient')));
 const NewVisit = Loadable(lazy(() => import('views/Patient/FormsUI/NewVisit')));
+const ShowTemplate = Loadable(lazy(() => import('views/ShowTemplate/index')));
 
 const MainRoutes = {
   path: '/',
@@ -86,6 +87,15 @@ const MainRoutes = {
       path: 'ResultentryIndex/:patientId/:encounterId/:labnumber',
       element: <ResultentryIndex />
     },
+    {
+      path: 'VerificationIndex/:patientId/:encounterId/:labnumber',
+      element: <VerificationIndex />
+    },
+    {
+      path: 'ShowTemplate/:Tid',
+      element: <ShowTemplate />
+    },
+    
     {
       path: 'laboratory',
       children: [

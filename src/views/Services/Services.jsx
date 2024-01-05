@@ -37,7 +37,8 @@ export default function Services() {
     Category: [],
     templateListmodel: [],
     TestResultTypes: [],
-    SampleTypes: []
+    SampleTypes: [],
+    templateListmodel:[]
   });
 
 
@@ -196,7 +197,8 @@ export default function Services() {
                     IsFromTestValues: values.IsFromTestValues,
                     TestValues: textareaValue,
                     NormalValForTestVal:normalValue,
-                    LabUOM:values.LabUom
+                    LabUOM:values.LabUom,
+                    TemplateID:values.Templates
                   };
 
                   axios
@@ -312,7 +314,15 @@ export default function Services() {
                       <Select1 style={{ width: '100%' }} name="ResultType"
                         getOptionLabel={(option) => option.LookupDescription}
                         getOptionValue={(option) => option.LookupID}
-                        label="ResultType" options={patientDropdown.TestResultTypes} />
+                        label="ResultType" options={patientDropdown.TestResultTypes}
+                       // onChangeCallback={handletemplateList}
+                         />
+                    </Grid>
+                    <Grid item xs={6} md={3}>
+                      <Select1 style={{ width: '100%' }} name="Templates"
+                        getOptionLabel={(option) => option.TempName}
+                        getOptionValue={(option) => option.TID}
+                        label="Templates" options={patientDropdown.templateListmodel} />
                     </Grid>
                     <Grid item xs={6} md={3}>
                       <Select1 style={{ width: '100%' }} name="SampleType" label="SampleType"

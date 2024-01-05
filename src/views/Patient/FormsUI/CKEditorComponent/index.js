@@ -1,21 +1,18 @@
-// CKEditorComponent.js
-import React, { useState } from 'react';
+// MyCKEditor.js
+import React from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-// import ClassicEditor from 'ckeditor5-custom-build/build/ckeditor';
 
-const CKEditorComponent = ({ onChange }) => {
-  const [editorData, setEditorData] = useState('');
-
-  const handleEditorChange = (event, editor) => {
-    const data = editor.getData();
-    setEditorData(data);
-    if (onChange) {
-      onChange(data);
-    }
-  };
-
-  return <CKEditor editor={ClassicEditor} data={editorData} onChange={handleEditorChange} />;
-};
+const CKEditorComponent = ({ data, onChange, readOnly }) => (
+  <CKEditor
+    editor={ClassicEditor}
+    data={data}
+    onChange={(event, editor) => {
+      const updatedData = editor.getData();
+      onChange(updatedData);
+    }}
+    disabled={readOnly}
+  />
+);
 
 export default CKEditorComponent;

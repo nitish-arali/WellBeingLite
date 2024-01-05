@@ -49,6 +49,11 @@ export const urlResultEntryIndex=`${baseURL}/api/Laboratory/ResultEntryIndex`;
 export const urlGetSelectedTestDataForResEntry=`${baseURL}/api/Laboratory/GetSelectedTestDataForResEntry`; 
 export const urlSaveTestsResultEntry=`${baseURL}/api/Laboratory/SaveTestsResultEntry`; 
 export const urlGetSelectedTestDataForResEntered=`${baseURL}/api/Laboratory/GetSelectedTestDataForResEntered`; 
+export const urlLoadAllDropDownsTemplate=`${baseURL}/api/Template/GetAllDropDownDataForTemplates`; 
+export const urlSaveNewTemplate=`${baseURL}/api/Template/SaveNewMasterTemplate`; 
+export const urlGetAllTemplates=`${baseURL}/api/Template/GetAllTemplates`; 
+export const urlEditTemplate=`${baseURL}/api/Template/EditTemplate`; 
+export const urlGetTemplateDataByTemplateId=`${baseURL}/api/Laboratory/GetTemplateDataByTemplateId`; 
 
 
 

@@ -83,10 +83,10 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
         <Avatar src={showGenderPic(patientdata)} sx={{ width: 60, height: 60 }} />
       </Grid>
       <Grid item xs={3} sx={{ padding: '8px' }}>
-        <Typography variant="body2" sx={{ marginBottom: '8px' }}>
-          <span style={{ fontWeight: '700' }}>UhId:</span> {patientdata?.UhId || 'N/A'}
-        </Typography>
-        <Typography variant="body2">
+       <Typography variant="body2" component="div" sx={{ marginBottom: '8px' }}>
+  <span style={{ fontWeight: '700' }}>UhId:</span> {patientdata?.UhId || 'N/A'}
+</Typography>
+        <Typography variant="body2" component="div">
           <span style={{ fontWeight: '700' }}>VisitId:</span>
           {en3 ? (
             <Chip label={en3} size="small" color="secondary" />
@@ -100,16 +100,16 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
         </Typography>
       </Grid>
       <Grid item xs={4} sx={{ padding: '8px' }}>
-        <Typography variant="body1" sx={{ marginBottom: '8px' }}>
+        <Typography variant="body1" component="div" sx={{ marginBottom: '8px' }}>
           <span style={{ fontWeight: '700' }}>{patientdata?.PatientName || 'N/A'}</span>
         </Typography>
-        <Typography variant="body2">{age}</Typography>
+        <Typography variant="body2" component="div">{age}</Typography>
       </Grid>
       <Grid item xs={1.5} sx={{ padding: '8px', position: 'relative' }}>
-        <Typography variant="body2" sx={{ marginBottom: '8px' }}>
+        <Typography variant="body2" component="div" sx={{ marginBottom: '8px' }}>
           {showGender(patientdata)}
         </Typography>
-        <Typography variant="body2">{dateOfBirth}</Typography>
+        <Typography component="div" variant="body2">{dateOfBirth}</Typography>
         <Box
           sx={{
             position: 'absolute',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Grid, Typography, IconButton } from '@mui/material';
+
 import Button from 'views/Patient/FormsUI/Button';
 import MuiButton from '@mui/material/Button';
 //import { makeStyles } from '@mui/styles';
@@ -18,7 +18,8 @@ import {
   urlSaveSampleColResult,
   urlLoadTestMethodGridData,
   urlLoadTestReferenceGrid,
-  urlGetSelectedTestDataForResEntry
+  urlGetSelectedTestDataForResEntry,
+  urlGetTemplateDataByTemplateId
 } from 'endpoints.ts';
 //import CustomAutocomplete from 'views/Patient/FormsUI/Autocomplete';
 import GeneralAutoComplete from 'views/Patient/FormsUI/GeneralAutoComplete';
@@ -28,6 +29,7 @@ import { toast } from 'react-toastify';
 import { TableContainer, Paper } from '@mui/material';
 //import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
+import { Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import * as Yup from 'yup';
 //import Select from 'views/Patient/FormsUI/Select';
 import { makeStyles } from '@mui/styles';
@@ -35,7 +37,7 @@ import TextField1 from 'views/Patient/FormsUI/Textfield/index.js';
 import { Select, MenuItem } from '@mui/material';
 //import Select from 'views/Patient/FormsUI/Select';
 import { useNavigate } from 'react-router';
-import TextField from '@mui/material/TextField';
+import CKEditorComponent from 'views/Patient/FormsUI/CKEditorComponent';
 const CustomCheckbox = ({ checked, onChange }) => <input type="checkbox" checked={checked} onChange={onChange} />;
 const ResultentryIndex = () => {
   const { patientId, encounterId, labnumber } = useParams();
@@ -52,6 +54,10 @@ const ResultentryIndex = () => {
   const [referenceRange, setReferenceRange] = useState([]);
   const [methodId, setMethodId] = useState([]);
   const [methodsByTestId, setMethodsByTestId] = useState({});
+  const [editorData, setEditorData] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [templateTid, setTemplateTid] = useState([]);
+  const [chargeId, setChargeId ] = useState([]);
   //const [selectedMethodValues, setSelectedMethodValues] = useState({});
   const [selectedMethodValues, setSelectedMethodValues] = useState({
     // other values...
@@ -165,7 +171,11 @@ const ResultentryIndex = () => {
     formWrapper: {
       marginTop: theme.spacing(5),
       marginBottom: theme.spacing(8)
-    }
+    },
+    dialog: {
+      width: '70%',  // Set the width
+      height: '70%', // Set the height
+    },
   }));
   const classes = useStyles();
 
@@ -395,22 +405,77 @@ const ResultentryIndex = () => {
     }
   }
 
-  // const handleObservedValueChange = (TestId, newValue) => {
-  //     debugger
-  //     // Update the ResultEntryList by mapping over it
-  //     const updatedResultEntryList = loadTableGrid.map((entry) => {
-  //         if (entry.TestId === TestId) {
-  //             return { ...entry, ObservedValues: newValue };
-  //         }
-  //         return entry;
-  //     });
+  const handleTemplateClick = async (testId,ChargeId) => {
+    debugger;
 
-  //     // Update the state with the new ResultEntryList
-  //     setloadTableGrid(updatedResultEntryList);
+    const row = loadTableGrid.find(item => item.ChargeId === ChargeId);
+    const TempID = row.TemplateId;
+     setTemplateTid(TempID);
+     setChargeId(ChargeId);
+     if(row.ResId>0){
+      setEditorData(row.ObservedValues);
+      setDialogOpen(true);
+     }
+     else{
+      try {
+        const response = await customAxios.get(
+          `${urlGetTemplateDataByTemplateId}?Tid=${TempID}`
+        );
+  
+        if (response.status === 200) {
+          const testListReferences = await response.data.data.TempData;
+          setEditorData(testListReferences);
+          setDialogOpen(true);
+        } else {
+          console.error('Failed to fetch test references');
+          setTemplateTid([]);
+          setEditorData('');
+          return []; // or handle error as needed
+  
+        }
+      } catch (error) {
+        setTemplateTid([]);
+        setEditorData('');
+        console.error('Error fetching test references:', error);
+        throw error; // Throw the error to be caught by the calling code
+      }
+     }
+  };
 
-  //     validateResult(TestId, newValue);
 
-  // };
+  const handleEditorChange = (data) => {
+    setEditorData(data);
+  };
+
+  const SaveTemplate = async () => {
+    try {
+       // Update the ResultEntryList by mapping over it
+    const updatedResultEntryList = loadTableGrid.map((entry) => {
+      if (entry.ChargeId === chargeId) {
+        const updatedEntry = { ...entry, ObservedValues: editorData };
+
+     return updatedEntry;
+      }
+      return entry;
+    });
+
+    // Update the state with the new ResultEntryList
+    setloadTableGrid(updatedResultEntryList);
+    setDialogOpen(false);
+    } catch (error) {
+      console.error('Error deleting SubTest:', error);
+      toast.error('Error deleting SubTest.');
+    } finally {
+     // setDeleteDialogOpen(false);
+     // setReferenceIdToDelete(null);
+    }
+  };
+
+  const CancelTemplate = () => {
+    setDialogOpen(false);
+    //setSubTestIdToDelete(null);
+  };
+
   const handleObservedValueChange = (TestId, newValue) => {
     debugger;
 
@@ -627,10 +692,10 @@ const ResultentryIndex = () => {
       headerClassName: 'super-app-theme--header',
       renderCell: (params) =>
         params.row.IsProfileTest ? (
-          // Render only the header name for IsProfileTest rows
           <div></div>
-        ) : // Render the TextField or Select based on IsFromTestValues
-        params.row.IsFromTestValues ? (
+        ) : params.row.IsTemplateTest ? (
+          <a href="#" onClick={() => handleTemplateClick(params.row.TestId, params.row.ChargeId)}>Template</a>
+        ) : params.row.IsFromTestValues ? (
           <Select
             style={{ width: '100%', border: params.row.IsResultNormal === false ? '2px solid #ff0000' : '' }}
             size="small"
@@ -661,7 +726,7 @@ const ResultentryIndex = () => {
       flex: 1,
       headerClassName: 'super-app-theme--header',
       renderCell: (params) =>
-        params.row.IsProfileTest ? (
+        params.row.IsProfileTest || params.row.IsTemplateTest ? (
           <div></div>
         ) : (
           <Select
@@ -687,7 +752,7 @@ const ResultentryIndex = () => {
       headerClassName: 'super-app-theme--header',
       flex: 1,
       renderCell: (params) =>
-        params.row.IsProfileTest ? (
+        params.row.IsProfileTest || params.row.IsTemplateTest ? (
           // Render only the header name for IsProfileTest rows
           <div></div>
         ) : (
@@ -770,6 +835,10 @@ const ResultentryIndex = () => {
     debugger;
     if (tab == 'SampleCollection') {
       const url = `/SampleCollectionIndex/${patientId}/${encounterId}/${labnumber}`;
+      navigate(url);
+    }
+    else if (tab == 'Verification') {
+      const url = `/VerificationIndex/${patientId}/${encounterId}/${labnumber}`;
       navigate(url);
     }
   };
@@ -856,11 +925,7 @@ const ResultentryIndex = () => {
                               disableRowSelectionOnClick
                               slots={{ toolbar: GridToolbar }}
                               getRowId={(row) => row.SmpColHeaderId}
-                              // style={{
-                              //     border: '1px solid #ddd',
-                              //     borderRadius: '5px',
-                              //     boxShadow: '0px 2px 6px #aaa',
-                              // }}
+                         
                               slotProps={{
                                 toolbar: {
                                   showQuickFilter: true,
@@ -929,6 +994,33 @@ const ResultentryIndex = () => {
                           </div>
                         </TableContainer>
                       </Box>
+                      {/* <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} classes={{ paper: classes.dialog }} maxWidth={false}  >
+                        <DialogTitle>Template</DialogTitle>
+                        <DialogContent>
+                          <Grid item xs={12}>
+                            <CKEditorComponent data={editorData} onChange={handleEditorChange} />
+                          </Grid>
+                        </DialogContent>
+                        <DialogActions>
+                          <Button onClick={() => setDialogOpen(false)}>Close</Button>
+                        </DialogActions>
+                      </Dialog> */}
+
+                      <Dialog open={dialogOpen}classes={{ paper: classes.dialog }} maxWidth={false} >
+                        <DialogTitle variant="h3">Template</DialogTitle>
+                        <DialogContent>
+                          <Grid item xs={12}>
+                            <CKEditorComponent data={editorData} onChange={handleEditorChange} />
+                          </Grid>
+                        </DialogContent>
+                        <DialogActions>
+                        <MuiButton variant='contained'  color='primary' onClick={SaveTemplate} >
+                            Save
+                          </MuiButton>
+                          <MuiButton variant='contained'  color='primary' onClick={CancelTemplate}>Cancel</MuiButton>
+                        
+                        </DialogActions>
+                      </Dialog>
                     </Grid>
                     <Grid item xs={10}></Grid>
                     <Grid item xs={2}></Grid>
