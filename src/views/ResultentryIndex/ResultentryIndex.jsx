@@ -6,6 +6,9 @@ import MuiButton from '@mui/material/Button';
 //import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
 import { Container } from '@mui/system';
+import { TextField } from '@mui/material';
+import BackButton from '@mui/icons-material/KeyboardBackspace';
+
 import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form } from 'formik';
 import customAxios from 'views/Patient/FormsUI/CustomAxios';
@@ -29,7 +32,7 @@ import { toast } from 'react-toastify';
 import { TableContainer, Paper } from '@mui/material';
 //import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import { Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
 import * as Yup from 'yup';
 //import Select from 'views/Patient/FormsUI/Select';
 import { makeStyles } from '@mui/styles';
@@ -57,7 +60,7 @@ const ResultentryIndex = () => {
   const [editorData, setEditorData] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [templateTid, setTemplateTid] = useState([]);
-  const [chargeId, setChargeId ] = useState([]);
+  const [chargeId, setChargeId] = useState([]);
   //const [selectedMethodValues, setSelectedMethodValues] = useState({});
   const [selectedMethodValues, setSelectedMethodValues] = useState({
     // other values...
@@ -71,6 +74,16 @@ const ResultentryIndex = () => {
   //     TestReference: Yup.string().required('required'),
   //   });
 
+  // const styles = {
+  //   abnormalResult: {
+  //     border: '5px solid red' // Change this to the desired color
+  //     // Add other styles as needed
+  //   },
+  //   normalResult: {
+  //     backgroundColor: 'white' // Change this to the desired color
+  //     // Add other styles as needed
+  //   }
+  // };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -173,9 +186,9 @@ const ResultentryIndex = () => {
       marginBottom: theme.spacing(8)
     },
     dialog: {
-      width: '70%',  // Set the width
-      height: '70%', // Set the height
-    },
+      width: '70%', // Set the width
+      height: '70%' // Set the height
+    }
   }));
   const classes = useStyles();
 
@@ -405,23 +418,20 @@ const ResultentryIndex = () => {
     }
   }
 
-  const handleTemplateClick = async (testId,ChargeId) => {
+  const handleTemplateClick = async (testId, ChargeId) => {
     debugger;
 
-    const row = loadTableGrid.find(item => item.ChargeId === ChargeId);
+    const row = loadTableGrid.find((item) => item.ChargeId === ChargeId);
     const TempID = row.TemplateId;
-     setTemplateTid(TempID);
-     setChargeId(ChargeId);
-     if(row.ResId>0){
+    setTemplateTid(TempID);
+    setChargeId(ChargeId);
+    if (row.ResId > 0) {
       setEditorData(row.ObservedValues);
       setDialogOpen(true);
-     }
-     else{
+    } else {
       try {
-        const response = await customAxios.get(
-          `${urlGetTemplateDataByTemplateId}?Tid=${TempID}`
-        );
-  
+        const response = await customAxios.get(`${urlGetTemplateDataByTemplateId}?Tid=${TempID}`);
+
         if (response.status === 200) {
           const testListReferences = await response.data.data.TempData;
           setEditorData(testListReferences);
@@ -431,7 +441,6 @@ const ResultentryIndex = () => {
           setTemplateTid([]);
           setEditorData('');
           return []; // or handle error as needed
-  
         }
       } catch (error) {
         setTemplateTid([]);
@@ -439,9 +448,8 @@ const ResultentryIndex = () => {
         console.error('Error fetching test references:', error);
         throw error; // Throw the error to be caught by the calling code
       }
-     }
+    }
   };
-
 
   const handleEditorChange = (data) => {
     setEditorData(data);
@@ -449,25 +457,25 @@ const ResultentryIndex = () => {
 
   const SaveTemplate = async () => {
     try {
-       // Update the ResultEntryList by mapping over it
-    const updatedResultEntryList = loadTableGrid.map((entry) => {
-      if (entry.ChargeId === chargeId) {
-        const updatedEntry = { ...entry, ObservedValues: editorData };
+      // Update the ResultEntryList by mapping over it
+      const updatedResultEntryList = loadTableGrid.map((entry) => {
+        if (entry.ChargeId === chargeId) {
+          const updatedEntry = { ...entry, ObservedValues: editorData };
 
-     return updatedEntry;
-      }
-      return entry;
-    });
+          return updatedEntry;
+        }
+        return entry;
+      });
 
-    // Update the state with the new ResultEntryList
-    setloadTableGrid(updatedResultEntryList);
-    setDialogOpen(false);
+      // Update the state with the new ResultEntryList
+      setloadTableGrid(updatedResultEntryList);
+      setDialogOpen(false);
     } catch (error) {
       console.error('Error deleting SubTest:', error);
       toast.error('Error deleting SubTest.');
     } finally {
-     // setDeleteDialogOpen(false);
-     // setReferenceIdToDelete(null);
+      // setDeleteDialogOpen(false);
+      // setReferenceIdToDelete(null);
     }
   };
 
@@ -694,10 +702,12 @@ const ResultentryIndex = () => {
         params.row.IsProfileTest ? (
           <div></div>
         ) : params.row.IsTemplateTest ? (
-          <a href="#" onClick={() => handleTemplateClick(params.row.TestId, params.row.ChargeId)}>Template</a>
+          <a href="#" onClick={() => handleTemplateClick(params.row.TestId, params.row.ChargeId)}>
+            Template
+          </a>
         ) : params.row.IsFromTestValues ? (
           <Select
-            style={{ width: '100%', border: params.row.IsResultNormal === false ? '2px solid #ff0000' : '' }}
+            style={{ width: '100%', height: '30px', border: params.row.IsResultNormal === false ? '2px solid #ff0000' : '' }}
             size="small"
             value={params.row.ObservedValues ?? ''}
             onChange={(e) => handleObservedValueChange(params.row.TestId, e.target.value)}
@@ -713,8 +723,14 @@ const ResultentryIndex = () => {
             name="ObservedValues"
             value={params.row.ObservedValues ?? ''}
             onChange={(e) => handleObservedValueChange(params.row.TestId, e.target.value)}
+            size="small"
             style={{
-              border: params.row.IsResultNormal === false ? '2px solid #ff0000' : ''
+              border: params.row.IsResultNormal === false ? '5px solid #ff0000' : '',
+              borderRadius: '10px',
+              overflow: 'hidden',
+              height: 'min-content',
+              width: '100%',
+              flexGrow: 1
             }}
           />
         )
@@ -730,7 +746,7 @@ const ResultentryIndex = () => {
           <div></div>
         ) : (
           <Select
-            style={{ width: '100%', size: 'small' }}
+            style={{ width: '100%', size: 'small', height: '30px' }}
             name="Method"
             label="Method"
             size="small"
@@ -756,7 +772,7 @@ const ResultentryIndex = () => {
           // Render only the header name for IsProfileTest rows
           <div></div>
         ) : (
-          <TextField1 name="NormalRanges" value={refrangedesc[params.row.TestId] ?? ''} disabled />
+          <TextField1 name="NormalRanges" value={refrangedesc[params.row.TestId] ?? ''} disabled style={{ height: 'min-content' }} />
         )
     }
   ];
@@ -836,211 +852,266 @@ const ResultentryIndex = () => {
     if (tab == 'SampleCollection') {
       const url = `/SampleCollectionIndex/${patientId}/${encounterId}/${labnumber}`;
       navigate(url);
-    }
-    else if (tab == 'Verification') {
+    } else if (tab == 'Verification') {
       const url = `/VerificationIndex/${patientId}/${encounterId}/${labnumber}`;
       navigate(url);
     }
   };
   const encounterId1 = 0;
   return (
-    <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
+    <Box
+      sx={{
+        width: '100%',
+        backgroundColor: 'white',
+        padding: '0',
+        border: '2px solid #ccc',
+        borderRadius: '10px',
+        paddingBottom: '10px'
+      }}
+    >
       <Grid container width={'100%'}>
-        <Grid item xs={12}>
-          <Container maxWidth="xlg">
-            <div className={classes.formWrapper}>
-              <Formik
-                initialValues={{ ...initialFormState }}
-                // validationSchema={FORM_VALIDATION}
-                onSubmit={handleSubmit}
-              >
-                <Form>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Typography variant="h3">ResultEntry</Typography>
-                      <Grid container spacing={2}>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('SampleCollection')}>
-                            Sample Collection
-                          </MuiButton>
-                        </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('ResultEntry')}>
-                            Result Entry
-                          </MuiButton>
-                        </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('Verification')}>
-                            Verification
-                          </MuiButton>
-                        </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('Report')}>
-                            Report
-                          </MuiButton>
-                        </Grid>
-                      </Grid>
+        <Grid item xs={11}>
+          <Typography
+            variant="h4"
+            sx={{
+              backgroundColor: '#1E88E5',
+              color: 'white',
+              padding: '12px',
+              borderTopLeftRadius: '10px',
+              fontSize: '20px',
+              fontWeight: '400'
+            }}
+          >
+            Result Entry
+          </Typography>
+        </Grid>
+        <Grid
+          item
+          xs={1}
+          sx={{
+            backgroundColor: '#1E88E5',
+
+            borderTopRightRadius: '10px',
+            fontSize: '15px',
+            fontWeight: '400',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'end',
+            paddingRight: '10px'
+          }}
+        >
+          <IconButton sx={{ color: 'white' }}>
+            <BackButton sx={{ fontSize: '30px' }} 
+            // onClick={handleBackButton} 
+            />
+          </IconButton>
+        </Grid>
+        <Grid item xs={12} sx={{ marginRight: '16px' }}>
+          <div className={classes.formWrapper}>
+            <Formik
+              initialValues={{ ...initialFormState }}
+              // validationSchema={FORM_VALIDATION}
+              onSubmit={handleSubmit}
+            >
+              <Form>
+                <div style={{ border: '2px solid #ccc', padding: '10px', marginLeft: '16px', borderRadius: '5px' }}>
+                  <Grid item xs={12} marginX={'5px'} borderRadius={'10px'}>
+                    <div>
                       <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
+                    </div>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Grid container spacing={2} marginLeft={'-10px'}>
+                      <Grid item>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('SampleCollection')}>
+                          Sample Collection
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="contained" onClick={() => handleButtonClick('ResultEntry')}>
+                          Result Entry
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('Verification')}>
+                          Verification
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('Report')}>
+                          Report
+                        </MuiButton>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{
-                          height: 300,
-                          width: '100%',
-                          '& .super-app-theme--header': {
-                            backgroundColor: 'rgba(0, 123, 255, 0.8)',
-                            color: 'white', // Set the font color to white or any other color you prefer
-                            fontWeight: 'bold' // Optionally, you can set the font weight
-                          }
-                        }}
-                      >
-                        <TableContainer component={Paper}>
-                          <div>
-                            <DataGrid
-                              rows={chargeDetails}
-                              columns={columns}
-                              //checkboxSelection
-                              onRowSelectionModelChange={(newSelection) => handleSelectionChange(newSelection)}
-                              initialState={{
-                                ...chargeDetails,
-                                pagination: { paginationModel: { pageSize: 5 } }
-                              }}
-                              getRowClassName={(params) => {
-                                return params.row.IsResultEntryDone ? 'highlight' : '';
-                              }}
-                              sx={{
-                                '.highlight': {
-                                  bgcolor: 'green',
-                                  color: 'white', // Set the font color to white or any other color you prefer
-                                  fontWeight: 'bold', // Optionally, you can set the font weight
-                                  '&:hover': {
-                                    bgcolor: 'green'
-                                  }
-                                }
-                              }}
-                              pageSizeOptions={[5, 10, 25]}
-                              disableColumnFilter
-                              disableColumnSelector
-                              disableDensitySelector
-                              disableRowSelectionOnClick
-                              slots={{ toolbar: GridToolbar }}
-                              getRowId={(row) => row.SmpColHeaderId}
-                         
-                              slotProps={{
-                                toolbar: {
-                                  showQuickFilter: true,
-                                  quickFilterProps: { debounceMs: 500 },
-                                  printOptions: { disableToolbarButton: true },
-                                  csvOptions: { disableToolbarButton: true }
-                                }
-                              }}
-                            />
-                          </div>
-                        </TableContainer>
-                      </Box>
-                    </Grid>
+                  </Grid>
 
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{
-                          height: 300,
-                          width: '100%',
-                          '& .super-app-theme--header': {
-                            backgroundColor: 'rgba(0, 123, 255, 0.8)',
-                            color: 'white', // Set the font color to white or any other color you prefer
-                            fontWeight: 'bold' // Optionally, you can set the font weight
-                          }
-                        }}
-                      >
-                        <TableContainer component={Paper}>
-                          <div>
-                            <DataGrid
-                              autoHeight
-                              rows={loadTableGrid}
-                              columns={columns1}
-                              initialState={{
-                                ...loadTableGrid,
-                                pagination: { paginationModel: { pageSize: 5 } }
-                              }}
-                              pageSizeOptions={[5, 10, 25]}
-                              disableColumnFilter
-                              disableColumnSelector
-                              disableDensitySelector
-                              disableRowSelectionOnClick
-                              slots={{ toolbar: GridToolbar }}
-                              getRowId={(row) => row.TestId} // Specify the custom id property here
-                              getRowClassName={(params) => {
-                                return params.row.IsProfileTest ? 'highlight' : '';
-                              }}
-                              sx={{
-                                '.highlight': {
-                                  bgcolor: 'teal',
-                                  color: 'white', // Set the font color to white or any other color you prefer
-                                  fontWeight: 'bold', // Optionally, you can set the font weight
-                                  '&:hover': {
-                                    bgcolor: 'teal'
-                                  }
-                                }
-                              }}
-                              slotProps={{
-                                toolbar: {
-                                  showQuickFilter: true,
-                                  quickFilterProps: { debounceMs: 500 },
-                                  printOptions: { disableToolbarButton: true },
-                                  csvOptions: { disableToolbarButton: true }
-                                }
-                              }}
-                            />
-                          </div>
-                        </TableContainer>
-                      </Box>
-                      {/* <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} classes={{ paper: classes.dialog }} maxWidth={false}  >
-                        <DialogTitle>Template</DialogTitle>
-                        <DialogContent>
-                          <Grid item xs={12}>
-                            <CKEditorComponent data={editorData} onChange={handleEditorChange} />
-                          </Grid>
-                        </DialogContent>
-                        <DialogActions>
-                          <Button onClick={() => setDialogOpen(false)}>Close</Button>
-                        </DialogActions>
-                      </Dialog> */}
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        // height: 300,
+                        width: '100%',
+                        '& .super-app-theme--header': {
+                          backgroundColor: 'rgba(0, 123, 255, 0.8)',
+                          color: 'white', // Set the font color to white or any other color you prefer
+                          fontWeight: 'bold' // Optionally, you can set the font weight
+                        }
+                      }}
+                    >
+                      <TableContainer component={Paper}>
+                        <DataGrid
+                          rows={chargeDetails}
+                          columns={columns}
+                          onRowSelectionModelChange={(newSelection) => handleSelectionChange(newSelection)}
+                          getRowClassName={(params) => {
+                            return params.row.IsResultEntryDone ? 'highlight' : '';
+                          }}
+                          getRowHeight={() => 35} // Set the desired height here
+                          columnHeaderHeight={35}
+                          sx={{
+                            marginLeft: '4px',
+                            marginRight: '4px',
+                            marginTop: '10px',
+                            '.highlight': {
+                              bgcolor: 'green',
+                              color: 'white',
+                              fontWeight: 'bold',
+                              '&:hover': {
+                                bgcolor: 'green'
+                              }
+                            },
+                            '& .MuiDataGrid-cell': {
+                              border: '1px solid #ccc',
+                              borderBottom: '1px solid #ccc'
+                            },
+                            '& .MuiDataGrid-columnHeader': {
+                              borderLeft: '1px solid #ccc',
+                              borderTop: '1px solid #ccc'
+                            }
+                          }}
+                          disableColumnFilter
+                          hideFooterPagination
+                          hideFooter
+                          disableColumnSelector
+                          disableDensitySelector
+                          disableRowSelectionOnClick
+                          slots={{ toolbar: GridToolbar }}
+                          getRowId={(row) => row.SmpColHeaderId}
+                          slotProps={{
+                            toolbar: {
+                              showQuickFilter: false,
+                              quickFilterProps: { debounceMs: 500 },
+                              printOptions: { disableToolbarButton: true },
+                              csvOptions: { disableToolbarButton: true }
+                            }
+                          }}
+                        />
+                      </TableContainer>
+                    </Box>
+                  </Grid>
 
-                      <Dialog open={dialogOpen}classes={{ paper: classes.dialog }} maxWidth={false} >
-                        <DialogTitle variant="h3">Template</DialogTitle>
-                        <DialogContent>
-                          <Grid item xs={12}>
-                            <CKEditorComponent data={editorData} onChange={handleEditorChange} />
-                          </Grid>
-                        </DialogContent>
-                        <DialogActions>
-                        <MuiButton variant='contained'  color='primary' onClick={SaveTemplate} >
-                            Save
-                          </MuiButton>
-                          <MuiButton variant='contained'  color='primary' onClick={CancelTemplate}>Cancel</MuiButton>
-                        
-                        </DialogActions>
-                      </Dialog>
-                    </Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2} textAlign={'end'}>
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        // height: 300,
+                        width: '100%',
+                        '& .super-app-theme--header': {
+                          backgroundColor: 'rgba(0, 123, 255, 0.8)',
+                          color: 'white', // Set the font color to white or any other color you prefer
+                          fontWeight: 'bold' // Optionally, you can set the font weight
+                        }
+                      }}
+                    >
+                      <TableContainer component={Paper}>
+                        <div>
+                          <DataGrid
+                            autoHeight
+                            rows={loadTableGrid}
+                            columns={columns1}
+                            disableColumnFilter
+                            disableColumnSelector
+                            disableDensitySelector
+                            disableRowSelectionOnClick
+                            hideFooterPagination
+                            hideFooter
+                            slots={{ toolbar: GridToolbar }}
+                            getRowId={(row) => row.TestId} // Specify the custom id property here
+                            getRowClassName={(params) => {
+                              if (params.row.IsProfileTest) {
+                                return 'highlight';
+                              } else if (!params.row.IsResultNormal) {
+                                return 'abnormalResult';
+                              }
+                              return '';
+                            }}
+                            getRowHeight={() => 45} // Set the desired height here
+                            columnHeaderHeight={35}
+                            sx={{
+                              marginLeft: '4px',
+                              marginRight: '4px',
+                              marginTop: '10px',
+                              '.highlight': {
+                                bgcolor: 'green',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                '&:hover': {
+                                  bgcolor: 'green'
+                                }
+                              },
+                              '& .MuiDataGrid-cell': {
+                                border: '1px solid #ccc',
+                                borderBottom: '1px solid #ccc'
+                              },
+                              '& .MuiDataGrid-columnHeader': {
+                                borderLeft: '1px solid #ccc',
+                                borderTop: '1px solid #ccc'
+                              }
+                              // '.abnormalResult .MuiDataGrid-cell': styles.abnormalResult
+
+                              // '.abnormalResult .MuiDataGrid-cell': {
+                              //   border: '2px solid #ff0000'
+
+                              // }
+                            }}
+                            slotProps={{
+                              toolbar: {
+                                showQuickFilter: false,
+                                quickFilterProps: { debounceMs: 500 },
+                                printOptions: { disableToolbarButton: true },
+                                csvOptions: { disableToolbarButton: true }
+                              }
+                            }}
+                          />
+                        </div>
+                      </TableContainer>
+                    </Box>
+                    <Dialog open={dialogOpen} classes={{ paper: classes.dialog }} maxWidth={false}>
+                      <DialogTitle variant="h3">Template</DialogTitle>
+                      <DialogContent>
+                        <Grid item xs={12}>
+                          <CKEditorComponent data={editorData} onChange={handleEditorChange} />
+                        </Grid>
+                      </DialogContent>
+                      <DialogActions>
+                        <MuiButton variant="contained" color="primary" onClick={SaveTemplate}>
+                          Save
+                        </MuiButton>
+                        <MuiButton variant="contained" color="primary" onClick={CancelTemplate}>
+                          Cancel
+                        </MuiButton>
+                      </DialogActions>
+                    </Dialog>
+                  </Grid>
+                  <Grid container display={'flex'} justifyContent={'end'} marginTop={2} marginRight={4}>
+                    <Grid item xs={2}>
                       <Button type="submit" style={{ width: '100%' }}>
                         Submit
                       </Button>
                     </Grid>
                   </Grid>
-                </Form>
-              </Formik>
-            </div>
-          </Container>
+                </div>
+              </Form>
+            </Formik>
+          </div>
         </Grid>
       </Grid>
     </Box>

@@ -13,6 +13,7 @@ import customAxios from '../CustomAxios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router';
+
 import {
   urlGetPatientDetail,
   urlAddNewPatient,
@@ -347,6 +348,7 @@ const NewPatient = () => {
                         getOptionValue={(option) => option.LookupID}
                       />
                     </Grid>
+
                     <Grid item xs={6} md={3}>
                       <TextField
                         name="PatientFirstName"

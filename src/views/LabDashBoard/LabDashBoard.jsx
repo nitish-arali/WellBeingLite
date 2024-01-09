@@ -1,6 +1,6 @@
 import CustomAutocomplete from 'views/Patient/FormsUI/Autocomplete';
 import { urlSearchUHID, urlSearchPatientsForLab } from 'endpoints.ts';
-import { Grid, Typography, Select, MenuItem } from '@mui/material';
+import { Grid, Typography, Select, MenuItem, TextField } from '@mui/material';
 import Button from 'views/Patient/FormsUI/Button';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
@@ -219,6 +219,7 @@ function LabDashboard() {
                       <div style={{ marginTop: '10px' }}>Not Done</div>
                       <div style={{ marginTop: '10px' }}>All Done</div>
                     </Grid>
+
                     <Grid
                       item
                       xs={0.8}
