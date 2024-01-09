@@ -1,9 +1,6 @@
 import CustomAutocomplete from 'views/Patient/FormsUI/Autocomplete';
 import { urlSearchUHID, urlSearchPatientsForLab } from 'endpoints.ts';
 import { Grid, Typography, Select, MenuItem, TextField } from '@mui/material';
-
-import { Grid, Typography, Select, MenuItem,TextField } from '@mui/material';
-
 import Button from 'views/Patient/FormsUI/Button';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
@@ -82,7 +79,6 @@ function LabDashboard() {
     }
   };
 
-
   const handleClearForm = (formik) => {
     setSelectedUhId(null);
     formik.resetForm({ values: { ...initialFormState } });
@@ -131,10 +127,10 @@ function LabDashboard() {
 
     // Function to format date to "dd-MM-yyyy"
     const formatDateString = (date) => {
-        if (!date) return '""';
-        let d = new Date(date);
-        return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth()+1)).slice(-2) + '-' + d.getFullYear();
-    }
+      if (!date) return '""';
+      let d = new Date(date);
+      return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear();
+    };
 
     try {
       const postData1 = {
@@ -143,7 +139,7 @@ function LabDashboard() {
         MobileNumber: values.MobileNumber === '' ? '""' : values.MobileNumber,
         LabNumber: values.LabNumber === '' ? '""' : values.LabNumber,
         Fromdate: formatDateString(values.FromDate),
-        Todate: formatDateString(values.ToDate),
+        Todate: formatDateString(values.ToDate)
       };
 
       customAxios
@@ -179,10 +175,8 @@ function LabDashboard() {
         <Grid item xs={12}>
           <Container maxWidth="xlg">
             <div className={classes.formWrapper}>
-              <Formik initialValues={{ ...initialFormState }} onSubmit={handleSubmit}
-              >
+              <Formik initialValues={{ ...initialFormState }} onSubmit={handleSubmit}>
                 {(formik) => (
-
                   <Form style={{ marginBottom: '-40px' }}>
                     <Grid container spacing={2} style={{ border: '2px solid #ccc', borderRadius: '10px', padding: '10px' }}>
                       <Grid item xs={3}>
@@ -221,12 +215,11 @@ function LabDashboard() {
                         </Button>
                       </Grid>
                       <Grid item xs={1} textAlign={'end'}>
-                      <MuiButton variant="contained"  color="primary" onClick={() => handleClearForm(formik)}>
-                        Clear
-                      </MuiButton>
+                        <MuiButton variant="contained" color="primary" onClick={() => handleClearForm(formik)}>
+                          Clear
+                        </MuiButton>
                       </Grid>
-                      
-                     
+
                       <Grid item xs={2}></Grid>
                       <Grid item xs={1.2} style={{ marginTop: '20px' }}>
                         <div>Partially Done</div>
@@ -236,7 +229,13 @@ function LabDashboard() {
                       <Grid
                         item
                         xs={0.8}
-                        style={{ marginTop: '20px', justifyContent: 'center', display: 'flex', flexDirection: 'column', alignItems: 'start' }}
+                        style={{
+                          marginTop: '20px',
+                          justifyContent: 'center',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'start'
+                        }}
                       >
                         <div>
                           <PartiallyDone style={{ color: '#FF6C22' }} />
@@ -249,35 +248,8 @@ function LabDashboard() {
                         </div>
                       </Grid>
                     </Grid>
-
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={1.2} style={{ marginTop: '20px' }}>
-                      <div>Partially Done</div>
-                      <div style={{ marginTop: '10px' }}>Not Done</div>
-                      <div style={{ marginTop: '10px' }}>All Done</div>
-                    </Grid>
-
-                    <Grid
-                      item
-                      xs={0.8}
-                      style={{ marginTop: '20px', justifyContent: 'center', display: 'flex', flexDirection: 'column', alignItems: 'start' }}
-                    >
-                      <div>
-                        <PartiallyDone style={{ color: '#FF6C22' }} />
-                      </div>
-                      <div>
-                        <NotDone style={{ color: '#994D1C' }} />
-                      </div>
-                      <div>
-                        <AllDone style={{ color: '#008000' }} />
-                      </div>
-                    </Grid>
-                  </Grid>
-                </Form>
-
                   </Form>
                 )}
-
               </Formik>
             </div>
           </Container>
