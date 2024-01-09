@@ -13,13 +13,10 @@ import customAxios from 'views/Patient/FormsUI/CustomAxios';
 import {
   urlResultEntryIndex,
   urlGetPatientHeaderWithPatientIAndEncounterId,
-  urlLoadTestReferenceForResEntry,
+  urlSaveVerification,
   urlGetSelectedTestDataForResEntered,
   urlSaveTestsResultEntry,
-  urlSaveSampleColResult,
-  urlLoadTestMethodGridData,
-  urlLoadTestReferenceGrid,
-  urlGetSelectedTestDataForResEntry
+
 } from 'endpoints.ts';
 //import CustomAutocomplete from 'views/Patient/FormsUI/Autocomplete';
 import GeneralAutoComplete from 'views/Patient/FormsUI/GeneralAutoComplete';
@@ -143,7 +140,7 @@ const VerificationIndex = () => {
       console.log('Selected Rows Data:', selectedRowsData);
 
       // Update the state with the new selection
-      setSelectedRows(newSelectedRows);
+      setSelectedRows(selectedRowsData);
       if (isSelected == true) {
         setloadTableGrid([]);
         setSelectedRows([]);
@@ -289,76 +286,146 @@ const VerificationIndex = () => {
     }
   ];
 
-  const updateLoadTableGrid = (originalLoadTableGrid, refrangedesc, selectedMethodValues) => {
+  //const [boolverifyStatus, setBoolverifyStatus] = useState();
+  const handleVerificationStatus = async (VerifyStatus) => {
     debugger;
-    const updatedLoadTableGrid = originalLoadTableGrid.map((entry) => {
-      const refrangedescForTestId = refrangedesc[entry.TestId] || '';
-      let methodForTestId = selectedMethodValues[entry.TestId] || '';
+    const intverifystatus = parseInt(VerifyStatus);
 
-      if (methodForTestId === 'NoMethod' || methodForTestId === '') {
-        methodForTestId = null;
-      }
-      return {
-        ...entry,
-        TestRefDescription: refrangedescForTestId,
-        MethodsID: methodForTestId,
-        PatientId: patientId,
-        EncounterId: encounterId
-      };
-    });
-
-    return updatedLoadTableGrid;
-  };
-  const handleSubmit = async (values, { resetForm }) => {
-    debugger;
-    console.log('data', loadTableGrid);
-    if (loadTableGrid.length == 0) {
-      toast.warning('Please Select Any One Test.');
-    }
-    const updatedLoadTableGrid1 = updateLoadTableGrid(loadTableGrid, refrangedesc, selectedMethodValues);
-    // Check if any ObservedValues is null or an empty string
-    //const hasNullObservedValues = updatedLoadTableGrid1.some(entry => entry.ObservedValues === null || entry.ObservedValues === '');
-    const hasNullObservedValues = updatedLoadTableGrid1.some((entry) => {
-      // Check if IsProfileTest is false and ObservedValues is null or empty
-      return !entry.IsProfileTest && (entry.ObservedValues === null || entry.ObservedValues === '');
-    });
-    // Show alert if there are null or empty ObservedValues
-    if (hasNullObservedValues) {
-      //alert('ObservedValues cannot be null or empty.');
-      toast.error('ObservedValues cannot be null or empty.');
+  
+    let newBoolVerifyStatus;
+    if (intverifystatus === 0) {
+      newBoolVerifyStatus = false;
+    } else if (intverifystatus === 1) {
+      newBoolVerifyStatus = true;
+    } else {
+      toast.warn('There Is A Problem Verifying A Test.');
       return;
     }
-    console.log('data', updatedLoadTableGrid1);
+  
+   // setBoolverifyStatus(newBoolVerifyStatus);
+    const row = selectedRows[0];
 
-    try {
-      const response = await customAxios.post(urlSaveTestsResultEntry, updatedLoadTableGrid1, {
-        params: {
-          PatientAge: patientAge
-        },
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
 
-      if (response.data.data.Status !== '') {
-        var message = response.data.data.Status;
-        if (message.includes('Result Entry Saved Successfully.') || message.includes('Result Entry Updated Successfully.')) {
-          toast.success(message);
-          resetForm();
 
-          setSelectedRows([]);
-          setloadTableGrid([]);
-          setSelectedMethodValues([]);
-          setRefrangedesc([]);
-          fetchChargeDetails();
-        }
+    
+    if (row != null) {
+      if (row.IsVerificationDone && intverifystatus === 1) {
+        toast.warn('This Test Is Already Verified......');
+        return false;
+      } else if (!row.IsVerificationDone && intverifystatus === 0) {
+        toast.warn('Please Verify the Test To Unverify.');
+        return false;
       } else {
-        toast.error('Something Went Wrong....');
+        if (row.IsResultEntryDone) {
+          row.IsVerificationDone = newBoolVerifyStatus;
+
+        }
       }
-    } catch (error) {
-      alert('errorr');
+      if (row != null ) {
+        try {
+          const response = await customAxios.post(urlSaveVerification, row, {
+
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.data.data.Status !== '') {
+            var message = response.data.data.Status;
+            if (message.includes('Data Saved Successfully.')) {
+              toast.success(message);
+             // resetForm();
+
+              setSelectedRows([]);
+              setloadTableGrid([]);
+
+              fetchChargeDetails();
+            }
+          } else {
+            toast.error('Something Went Wrong....');
+          }
+        } catch (error) {
+          alert('errorr');
+        }
+      }
+
+    }
+    else {
+      toast.warn('Please Select Sample.....');
     }
   };
+
+
+  // const updateLoadTableGrid = (originalLoadTableGrid, refrangedesc, selectedMethodValues) => {
+  //   debugger;
+  //   const updatedLoadTableGrid = originalLoadTableGrid.map((entry) => {
+  //     const refrangedescForTestId = refrangedesc[entry.TestId] || '';
+  //     let methodForTestId = selectedMethodValues[entry.TestId] || '';
+
+  //     if (methodForTestId === 'NoMethod' || methodForTestId === '') {
+  //       methodForTestId = null;
+  //     }
+  //     return {
+  //       ...entry,
+  //       TestRefDescription: refrangedescForTestId,
+  //       MethodsID: methodForTestId,
+  //       PatientId: patientId,
+  //       EncounterId: encounterId
+  //     };
+  //   });
+
+  //   return updatedLoadTableGrid;
+  // };
+  // const handleSubmit = async (values, { resetForm }) => {
+  //   debugger;
+  //   console.log('data', loadTableGrid);
+  //   if (loadTableGrid.length == 0) {
+  //     toast.warning('Please Select Any One Test.');
+  //   }
+  //   const updatedLoadTableGrid1 = updateLoadTableGrid(loadTableGrid, refrangedesc, selectedMethodValues);
+  //   // Check if any ObservedValues is null or an empty string
+  //   //const hasNullObservedValues = updatedLoadTableGrid1.some(entry => entry.ObservedValues === null || entry.ObservedValues === '');
+  //   const hasNullObservedValues = updatedLoadTableGrid1.some((entry) => {
+  //     // Check if IsProfileTest is false and ObservedValues is null or empty
+  //     return !entry.IsProfileTest && (entry.ObservedValues === null || entry.ObservedValues === '');
+  //   });
+  //   // Show alert if there are null or empty ObservedValues
+  //   if (hasNullObservedValues) {
+  //     //alert('ObservedValues cannot be null or empty.');
+  //     toast.error('ObservedValues cannot be null or empty.');
+  //     return;
+  //   }
+  //   console.log('data', updatedLoadTableGrid1);
+
+  //   try {
+  //     const response = await customAxios.post(urlSaveTestsResultEntry, updatedLoadTableGrid1, {
+  //       params: {
+  //         PatientAge: patientAge
+  //       },
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+
+  //     if (response.data.data.Status !== '') {
+  //       var message = response.data.data.Status;
+  //       if (message.includes('Result Entry Saved Successfully.') || message.includes('Result Entry Updated Successfully.')) {
+  //         toast.success(message);
+  //         resetForm();
+
+  //         setSelectedRows([]);
+  //         setloadTableGrid([]);
+  //         setSelectedMethodValues([]);
+  //         setRefrangedesc([]);
+  //         fetchChargeDetails();
+  //       }
+  //     } else {
+  //       toast.error('Something Went Wrong....');
+  //     }
+  //   } catch (error) {
+  //     alert('errorr');
+  //   }
+  // };
 
   const handleButtonClick = (tab) => {
     debugger;
@@ -376,191 +443,206 @@ const VerificationIndex = () => {
     <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
       <Grid container width={'100%'}>
         <Grid item xs={12}>
-          <Container maxWidth="xlg">
-            <div className={classes.formWrapper}>
-              <Formik
-                initialValues={{ ...initialFormState }}
-                // validationSchema={FORM_VALIDATION}
-                onSubmit={handleSubmit}
-              >
-                <Form>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Typography variant="h3">Verification</Typography>
-                      <Grid container spacing={2}>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('SampleCollection')}>
-                            Sample Collection
-                          </MuiButton>
-                        </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('ResultEntry')}>
-                            Result Entry
-                          </MuiButton>
-                        </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('Verification')}>
-                            Verification
-                          </MuiButton>
-                        </Grid>
-                        <Grid item>
-                          <MuiButton variant="contained" onClick={() => handleButtonClick('Report')}>
-                            Report
-                          </MuiButton>
-                        </Grid>
-                      </Grid>
-                      <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{
-                          height: 300,
-                          width: '100%',
-                          '& .super-app-theme--header': {
-                            backgroundColor: 'rgba(0, 123, 255, 0.8)',
-                            color: 'white', // Set the font color to white or any other color you prefer
-                            fontWeight: 'bold' // Optionally, you can set the font weight
-                          }
-                        }}
-                      >
-                        <TableContainer component={Paper}>
-                          <div>
-                            <DataGrid
-                              rows={chargeDetails}
-                              columns={columns}
-                              //checkboxSelection
-                              onRowSelectionModelChange={(newSelection) => handleSelectionChange(newSelection)}
-                              initialState={{
-                                ...chargeDetails,
-                                pagination: { paginationModel: { pageSize: 5 } }
-                              }}
-                              getRowClassName={(params) => {
-                                return params.row.IsResultEntryDone ? 'highlight' : '';
-                              }}
-                              sx={{
-                                '.highlight': {
-                                  bgcolor: 'green',
-                                  color: 'white', // Set the font color to white or any other color you prefer
-                                  fontWeight: 'bold', // Optionally, you can set the font weight
-                                  '&:hover': {
-                                    bgcolor: 'green'
-                                  }
-                                }
-                              }}
-                              pageSizeOptions={[5, 10, 25]}
-                              disableColumnFilter
-                              disableColumnSelector
-                              disableDensitySelector
-                              disableRowSelectionOnClick
-                              slots={{ toolbar: GridToolbar }}
-                              getRowId={(row) => row.SmpColHeaderId}
-                              // style={{
-                              //     border: '1px solid #ddd',
-                              //     borderRadius: '5px',
-                              //     boxShadow: '0px 2px 6px #aaa',
-                              // }}
-                              slotProps={{
-                                toolbar: {
-                                  showQuickFilter: true,
-                                  quickFilterProps: { debounceMs: 500 },
-                                  printOptions: { disableToolbarButton: true },
-                                  csvOptions: { disableToolbarButton: true }
-                                }
-                              }}
-                            />
-                          </div>
-                        </TableContainer>
-                      </Box>
-                    </Grid>
 
-                    <Grid item xs={12}>
-                      <Box
+          <div className={classes.formWrapper}>
+            <Formik
+              initialValues={{ ...initialFormState }}
+            // validationSchema={FORM_VALIDATION}
+            //onSubmit={handleSubmit}
+            >
+              <Form>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="h3">Verification</Typography>
+                    <Grid container spacing={2}>
+                      <Grid item>
+                        <MuiButton variant="contained" onClick={() => handleButtonClick('SampleCollection')}>
+                          Sample Collection
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="contained" onClick={() => handleButtonClick('ResultEntry')}>
+                          Result Entry
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="contained" onClick={() => handleButtonClick('Verification')}>
+                          Verification
+                        </MuiButton>
+                      </Grid>
+                      <Grid item>
+                        <MuiButton variant="contained" onClick={() => handleButtonClick('Report')}>
+                          Report
+                        </MuiButton>
+                      </Grid>
+                    </Grid>
+                    <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        height: 300,
+                        width: '100%',
+                        '& .super-app-theme--header': {
+                          backgroundColor: 'rgba(0, 123, 255, 0.8)',
+                          color: 'white', // Set the font color to white or any other color you prefer
+                          fontWeight: 'bold' // Optionally, you can set the font weight
+                        }
+                      }}
+                    >
+                      <TableContainer component={Paper}>
+                        <div>
+                          <DataGrid
+                            rows={chargeDetails}
+                            columns={columns}
+                            //checkboxSelection
+                            onRowSelectionModelChange={(newSelection) => handleSelectionChange(newSelection)}
+                            initialState={{
+                              ...chargeDetails,
+                              pagination: { paginationModel: { pageSize: 5 } }
+                            }}
+                            getRowClassName={(params) => {
+                              return params.row.IsVerificationDone ? 'highlight' : '';
+                            }}
+                            sx={{
+                              '.highlight': {
+                                bgcolor: 'green',
+                                color: 'white', // Set the font color to white or any other color you prefer
+                                fontWeight: 'bold', // Optionally, you can set the font weight
+                                '&:hover': {
+                                  bgcolor: 'green'
+                                }
+                              }
+                            }}
+                            pageSizeOptions={[5, 10, 25]}
+                            disableColumnFilter
+                            disableColumnSelector
+                            disableDensitySelector
+                            disableRowSelectionOnClick
+                            slots={{ toolbar: GridToolbar }}
+                            getRowId={(row) => row.SmpColHeaderId}
+                            // style={{
+                            //     border: '1px solid #ddd',
+                            //     borderRadius: '5px',
+                            //     boxShadow: '0px 2px 6px #aaa',
+                            // }}
+                            slotProps={{
+                              toolbar: {
+                                showQuickFilter: true,
+                                quickFilterProps: { debounceMs: 500 },
+                                printOptions: { disableToolbarButton: true },
+                                csvOptions: { disableToolbarButton: true }
+                              }
+                            }}
+                          />
+                        </div>
+                      </TableContainer>
+                    </Box>
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Box
+                      sx={{
+                        height: 300,
+                        width: '100%',
+                        '& .super-app-theme--header': {
+                          backgroundColor: 'rgba(0, 123, 255, 0.8)',
+                          color: 'white', // Set the font color to white or any other color you prefer
+                          fontWeight: 'bold' // Optionally, you can set the font weight
+                        }
+                      }}
+                    >
+                      <TableContainer component={Paper}>
+                        <div>
+                          <DataGrid
+                            autoHeight
+                            rows={loadTableGrid}
+                            columns={columns1}
+                            initialState={{
+                              ...loadTableGrid,
+                              pagination: { paginationModel: { pageSize: 5 } }
+                            }}
+                            pageSizeOptions={[5, 10, 25]}
+                            disableColumnFilter
+                            disableColumnSelector
+                            disableDensitySelector
+                            disableRowSelectionOnClick
+                            slots={{ toolbar: GridToolbar }}
+                            getRowId={(row) => row.TestId} // Specify the custom id property here
+                            getRowClassName={(params) => {
+                              return params.row.IsProfileTest ? 'highlight' : '';
+                            }}
+                            sx={{
+                              '.highlight': {
+                                bgcolor: 'teal',
+                                color: 'white', // Set the font color to white or any other color you prefer
+                                fontWeight: 'bold', // Optionally, you can set the font weight
+                                '&:hover': {
+                                  bgcolor: 'teal'
+                                }
+                              }
+                            }}
+                            slotProps={{
+                              toolbar: {
+                                showQuickFilter: true,
+                                quickFilterProps: { debounceMs: 500 },
+                                printOptions: { disableToolbarButton: true },
+                                csvOptions: { disableToolbarButton: true }
+                              }
+                            }}
+                          />
+                        </div>
+                      </TableContainer>
+                    </Box>
+                  
+                    <Grid
+                        container
+                        spacing={2}
                         sx={{
-                          height: 300,
-                          width: '100%',
-                          '& .super-app-theme--header': {
-                            backgroundColor: 'rgba(0, 123, 255, 0.8)',
-                            color: 'white', // Set the font color to white or any other color you prefer
-                            fontWeight: 'bold' // Optionally, you can set the font weight
-                          }
+                          // padding: '10px',
+                          marginLeft: '0px',
+                          marginTop: '0px',
+                          paddingBottom: '20px',
+                          // width: '100%',
+                          // border: '1px solid #ccc',
+                          // borderRadius: '5px',
+                          // marginLeft: '18px',
+                          marginRight: '0%'
                         }}
                       >
-                        <TableContainer component={Paper}>
-                          <div>
-                            <DataGrid
-                              autoHeight
-                              rows={loadTableGrid}
-                              columns={columns1}
-                              initialState={{
-                                ...loadTableGrid,
-                                pagination: { paginationModel: { pageSize: 5 } }
-                              }}
-                              pageSizeOptions={[5, 10, 25]}
-                              disableColumnFilter
-                              disableColumnSelector
-                              disableDensitySelector
-                              disableRowSelectionOnClick
-                              slots={{ toolbar: GridToolbar }}
-                              getRowId={(row) => row.TestId} // Specify the custom id property here
-                              getRowClassName={(params) => {
-                                return params.row.IsProfileTest ? 'highlight' : '';
-                              }}
-                              sx={{
-                                '.highlight': {
-                                  bgcolor: 'teal',
-                                  color: 'white', // Set the font color to white or any other color you prefer
-                                  fontWeight: 'bold', // Optionally, you can set the font weight
-                                  '&:hover': {
-                                    bgcolor: 'teal'
-                                  }
-                                }
-                              }}
-                              slotProps={{
-                                toolbar: {
-                                  showQuickFilter: true,
-                                  quickFilterProps: { debounceMs: 500 },
-                                  printOptions: { disableToolbarButton: true },
-                                  csvOptions: { disableToolbarButton: true }
-                                }
-                              }}
-                            />
-                          </div>
-                        </TableContainer>
-                      </Box>
-                    </Grid>
-                    <Dialog open={dialogOpen} classes={{ paper: classes.dialog }} maxWidth={false} >
-                      <DialogTitle variant="h3">Template</DialogTitle>
-                      <DialogContent>
-                        <Grid item xs={12}>
-                          {/* Make CKEditor readonly */}
-                          <CKEditorComponent data={editorData} onChange={handleEditorChange}  readOnly={true} />
-                        </Grid>
-                      </DialogContent>
-                      <DialogActions>
-                        <MuiButton variant='contained' color='primary' onClick={CancelTemplate}>Cancel</MuiButton>
-                      </DialogActions>
-                    </Dialog>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2}></Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2} textAlign={'end'}>
-                      <Button type="submit" style={{ width: '100%' }}>
-                        Submit
-                      </Button>
-                    </Grid>
+                         <Grid item xs={8}></Grid>
+                      <Grid item xs={1}>
+                        <MuiButton variant='contained' color='primary' onClick={() => handleVerificationStatus(1)}>Verify</MuiButton>
+                      </Grid>
+                      <Grid item xs={1}>
+                        <MuiButton variant='contained' color='error' onClick={() => handleVerificationStatus(0)}>UnVerify</MuiButton>
+                      </Grid>
+                      </Grid>
+
+
+
                   </Grid>
-                </Form>
-              </Formik>
-            </div>
-          </Container>
+                  <Dialog open={dialogOpen} classes={{ paper: classes.dialog }} maxWidth={false} >
+                    <DialogTitle variant="h3">Template</DialogTitle>
+                    <DialogContent>
+                      <Grid item xs={12}>
+                        {/* Make CKEditor readonly */}
+                        <CKEditorComponent data={editorData} onChange={handleEditorChange} readOnly={true} />
+                      </Grid>
+                    </DialogContent>
+                    <DialogActions>
+                      <MuiButton variant='contained' color='primary' onClick={CancelTemplate}>Cancel</MuiButton>
+                    </DialogActions>
+                  </Dialog>
+
+
+                </Grid>
+              </Form>
+            </Formik>
+          </div>
         </Grid>
       </Grid>
+
     </Box>
   );
 };

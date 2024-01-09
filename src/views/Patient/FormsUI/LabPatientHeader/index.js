@@ -77,7 +77,12 @@ function LabPatientHeader({
   };
 
   const Verification = () => {
-    // Handle the "Edit Reg Details" action here
+    // Handle the "Edit Reg Details" action here 
+    const url = `/VerificationIndex/${patientdata.PatientId}/${patientdata.EncounterId}/${patientdata.PatientLabStatusID}`;
+
+    // Navigate to the new URL
+    navigate(url);
+
     handleMenuClose();
   };
 

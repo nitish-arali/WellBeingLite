@@ -31,6 +31,7 @@ const VerificationIndex = Loadable(lazy(() => import('views/VerificationIndex/Ve
 const NewPatient = Loadable(lazy(() => import('views/Patient/FormsUI/NewPatient')));
 const NewVisit = Loadable(lazy(() => import('views/Patient/FormsUI/NewVisit')));
 const ShowTemplate = Loadable(lazy(() => import('views/ShowTemplate/index')));
+const UserRegistration = Loadable(lazy(() => import('views/UserRegistration/UserRegistration')));
 
 const MainRoutes = {
   path: '/',
@@ -185,7 +186,16 @@ const MainRoutes = {
         }
       ]
     },
-
+    
+    {
+      path: 'UserRegistration',
+      children: [
+        {
+          path: '/UserRegistration',
+          element: <UserRegistration />
+        }
+      ]
+    },
     {
       path: 'utils',
       children: [

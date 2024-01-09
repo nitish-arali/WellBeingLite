@@ -6,6 +6,7 @@ import Select from '../Select';
 import DateTimePicker from '../DateTimePicker';
 import Box from '@mui/material/Box';
 import TextField from 'views/Patient/FormsUI/Textfield';
+import TextField1 from '@mui/material/TextField';
 import Button from 'views/Patient/FormsUI/Button';
 import IconButton from '@mui/material/IconButton';
 import KeyboardDoubleArrowLeftRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded';
@@ -356,6 +357,10 @@ const NewPatient = () => {
                           </span>
                         }
                       />
+                    </Grid>
+                   
+                    <Grid item xs={6} md={3}>
+                    <TextField1 id="outlined-basic" label="Outlined" variant="outlined" />
                     </Grid>
                     <Grid item xs={6} md={3}>
                       <TextField name="PatientMiddleName" label="Middle Name" />

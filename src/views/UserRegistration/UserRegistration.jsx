@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, TextField } from '@mui/material';
 
-function ContainerDefinitions() {
+function UserRegistration() {
   const [value, setValue] = useState('');
   const [error, setError] = useState(false);
 
@@ -48,4 +48,4 @@ function ContainerDefinitions() {
   );
 }
 
-export default ContainerDefinitions;
+export default UserRegistration;
