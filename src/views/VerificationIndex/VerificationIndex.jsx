@@ -127,6 +127,66 @@ const VerificationIndex = () => {
     fetchChargeDetails();
   }, [patientId, encounterId, labnumber]);
 
+  const handleVerificationStatus = async (VerifyStatus) => {
+    debugger;
+    const intverifystatus = parseInt(VerifyStatus);
+
+    let newBoolVerifyStatus;
+    if (intverifystatus === 0) {
+      newBoolVerifyStatus = false;
+    } else if (intverifystatus === 1) {
+      newBoolVerifyStatus = true;
+    } else {
+      toast.warn('There Is A Problem Verifying A Test.');
+      return;
+    }
+
+    // setBoolverifyStatus(newBoolVerifyStatus);
+    const row = selectedRows[0];
+
+    if (row != null) {
+      if (row.IsVerificationDone && intverifystatus === 1) {
+        toast.warn('This Test Is Already Verified......');
+        return false;
+      } else if (!row.IsVerificationDone && intverifystatus === 0) {
+        toast.warn('Please Verify the Test To Unverify.');
+        return false;
+      } else {
+        if (row.IsResultEntryDone) {
+          row.IsVerificationDone = newBoolVerifyStatus;
+        }
+      }
+      if (row != null) {
+        try {
+          const response = await customAxios.post(urlSaveVerification, row, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.data.data.Status !== '') {
+            var message = response.data.data.Status;
+            if (message.includes('Data Saved Successfully.')) {
+              toast.success(message);
+              // resetForm();
+
+              setSelectedRows([]);
+              setloadTableGrid([]);
+
+              fetchChargeDetails();
+            }
+          } else {
+            toast.error('Something Went Wrong....');
+          }
+        } catch (error) {
+          alert('errorr');
+        }
+      }
+    } else {
+      toast.warn('Please Select Sample.....');
+    }
+  };
+
   const handleSelectionChange = (newSelection) => {
     debugger;
 
@@ -610,10 +670,15 @@ const VerificationIndex = () => {
                   </Dialog>
 
                   <Grid container display={'flex'} justifyContent={'end'} marginTop={2} marginRight={4}>
-                    <Grid item xs={2}>
-                      <Button type="submit" style={{ width: '100%' }}>
-                        Submit
-                      </Button>
+                    <Grid item xs={1}>
+                      <MuiButton variant="contained" color="primary" onClick={() => handleVerificationStatus(1)}>
+                        Verify
+                      </MuiButton>
+                    </Grid>
+                    <Grid item xs={1}>
+                      <MuiButton variant="contained" color="error" onClick={() => handleVerificationStatus(0)}>
+                        UnVerify
+                      </MuiButton>
                     </Grid>
                   </Grid>
                 </div>
