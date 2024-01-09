@@ -1,6 +1,9 @@
 import CustomAutocomplete from 'views/Patient/FormsUI/Autocomplete';
 import { urlSearchUHID, urlSearchPatientsForLab } from 'endpoints.ts';
 import { Grid, Typography, Select, MenuItem, TextField } from '@mui/material';
+
+import { Grid, Typography, Select, MenuItem,TextField } from '@mui/material';
+
 import Button from 'views/Patient/FormsUI/Button';
 import { makeStyles } from '@mui/styles';
 import Box from '@mui/material/Box';
@@ -52,13 +55,13 @@ function LabDashboard() {
   const handleInputChange = (newInputValue) => {
     setInputValue(newInputValue);
   };
+
   useEffect(() => {
     // This code will run when the component mounts
 
     // Call handleSubmit with the initial form state values
     handleSubmit(initialFormState);
-  }, []); // Empty dependency array ensures that useEffect runs only when the component mounts
-
+  }, []); // Empty dependency array ensures that useEffect runs only when the component m
   // ... (other JSX and return statement)
 
   const handleAutocompleteChange = (newValue) => {
@@ -79,47 +82,10 @@ function LabDashboard() {
     }
   };
 
-  const handleSubmit = (values) => {
-    debugger;
 
-    const uhid = selectedUhId ? selectedUhId.UhId : '';
-
-    try {
-      // Assuming postData1 is an object with your input values
-      const postData1 = {
-        Uhid: uhid === '' ? '""' : uhid, // Set to empty string when left blank
-        PatientName: values.Name === '' ? '""' : values.Name,
-        MobileNumber: values.MobileNumber === '' ? '""' : values.MobileNumber,
-        LabNumber: values.LabNumber === '' ? '""' : values.LabNumber,
-        Fromdate: values.FromDate === '' ? '""' : values.FromDate,
-        Todate: values.ToDate === '' ? '""' : values.ToDate
-      };
-      customAxios
-        .get(
-          `${urlSearchPatientsForLab}?uhid=${postData1.Uhid}&PName=${postData1.PatientName}&PMobNum=${postData1.MobileNumber}&LabNumber=${postData1.LabNumber}&fromdate=${postData1.Fromdate}&Todate=${postData1.Todate}`,
-          null,
-          {
-            params: postData1,
-            headers: {
-              'Content-Type': 'application/json' // Replace with the appropriate content type if needed
-            }
-          }
-        )
-        .then((response) => {
-          console.log('Response:', response.data);
-          //resetForm();
-          setPatientDetails(response.data.data.LabPatientsList);
-        });
-    } catch (error) {
-      // Handle any errors here
-      console.error('Error:', error);
-    }
-  };
-
-  const handleClearForm = (event) => {
-    if (event) {
-      event.preventDefault();
-    }
+  const handleClearForm = (formik) => {
+    setSelectedUhId(null);
+    formik.resetForm({ values: { ...initialFormState } });
   };
 
   //pagination and x-y of z and totalcountof patient
@@ -157,6 +123,49 @@ function LabDashboard() {
   const getOptionLabel = (option) => option.UhId;
 
   const isOptionEqualToValue = (option, value) => option.UhId === value.UhId;
+
+  const handleSubmit = (values) => {
+    debugger;
+
+    const uhid = selectedUhId ? selectedUhId.UhId : '';
+
+    // Function to format date to "dd-MM-yyyy"
+    const formatDateString = (date) => {
+        if (!date) return '""';
+        let d = new Date(date);
+        return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth()+1)).slice(-2) + '-' + d.getFullYear();
+    }
+
+    try {
+      const postData1 = {
+        Uhid: uhid === '' ? '""' : uhid,
+        PatientName: values.Name === '' ? '""' : values.Name,
+        MobileNumber: values.MobileNumber === '' ? '""' : values.MobileNumber,
+        LabNumber: values.LabNumber === '' ? '""' : values.LabNumber,
+        Fromdate: formatDateString(values.FromDate),
+        Todate: formatDateString(values.ToDate),
+      };
+
+      customAxios
+        .get(
+          `${urlSearchPatientsForLab}?uhid=${postData1.Uhid}&PName=${postData1.PatientName}&PMobNum=${postData1.MobileNumber}&LabNumber=${postData1.LabNumber}&fromdate=${postData1.Fromdate}&Todate=${postData1.Todate}`,
+          null,
+          {
+            params: postData1,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+        .then((response) => {
+          console.log('Response:', response.data);
+          setPatientDetails(response.data.data.LabPatientsList);
+        });
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   return (
     <Box
       sx={{ width: '100%', backgroundColor: 'white', padding: '0', border: '2px solid #ccc', borderRadius: '10px', paddingBottom: '10px' }}
@@ -170,49 +179,77 @@ function LabDashboard() {
         <Grid item xs={12}>
           <Container maxWidth="xlg">
             <div className={classes.formWrapper}>
-              <Formik initialValues={{ ...initialFormState }} onSubmit={handleSubmit}>
-                <Form style={{ marginBottom: '-40px' }}>
-                  <Grid container spacing={2} style={{ border: '2px solid #ccc', borderRadius: '10px', padding: '10px' }}>
-                    <Grid item xs={3}>
-                      {/* <TextField name="Uhid" label="Uhid" /> */}
-                      <CustomAutocomplete
-                        id="uhid-autocomplete"
-                        label="UHID"
-                        name="Uhid"
-                        options={options}
-                        value={selectedUhId}
-                        onInputChange={handleInputChange}
-                        onChange={handleAutocompleteChange}
-                        fetchOptionsCallback={fetchOptionsCallback}
-                        getOptionLabel={getOptionLabel}
-                        isOptionEqualToValue={isOptionEqualToValue}
-                      />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <TextField1 name="Name" label="Name" />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <TextField1 name="MobileNumber" label="Mobile Number" />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <TextField1 name="LabNumber" label="LabNumber" />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <DateTimePicker style={{ width: '100%' }} name="FromDate" label="FromDate" />
-                    </Grid>
-                    <Grid item xs={3}>
-                      <DateTimePicker style={{ width: '100%' }} name="ToDate" label="ToDate" />
-                    </Grid>
-                    <Grid item xs={1} textAlign={'end'}>
-                      <Button type="submit" style={{ width: '100%' }}>
-                        Submit
-                      </Button>
-                    </Grid>
-                    <Grid item xs={1} justifyContent={'end'}>
-                      <MuiButton variant="contained" fullWidth color="primary" onClick={handleClearForm}>
+              <Formik initialValues={{ ...initialFormState }} onSubmit={handleSubmit}
+              >
+                {(formik) => (
+
+                  <Form style={{ marginBottom: '-40px' }}>
+                    <Grid container spacing={2} style={{ border: '2px solid #ccc', borderRadius: '10px', padding: '10px' }}>
+                      <Grid item xs={3}>
+                        {/* <TextField name="Uhid" label="Uhid" /> */}
+                        <CustomAutocomplete
+                          id="uhid-autocomplete"
+                          label="UHID"
+                          name="Uhid"
+                          options={options}
+                          value={selectedUhId}
+                          onInputChange={handleInputChange}
+                          onChange={handleAutocompleteChange}
+                          fetchOptionsCallback={fetchOptionsCallback}
+                          getOptionLabel={getOptionLabel}
+                          isOptionEqualToValue={isOptionEqualToValue}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <TextField1 name="Name" label="Name" />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <TextField1 name="MobileNumber" label="Mobile Number" />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <TextField1 name="LabNumber" label="LabNumber" />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <DateTimePicker style={{ width: '100%' }} name="FromDate" label="FromDate" />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <DateTimePicker style={{ width: '100%' }} name="ToDate" label="ToDate" />
+                      </Grid>
+                      <Grid item xs={1} textAlign={'end'}>
+                        <Button type="submit" style={{ width: '100%' }}>
+                          Submit
+                        </Button>
+                      </Grid>
+                      <Grid item xs={1} textAlign={'end'}>
+                      <MuiButton variant="contained"  color="primary" onClick={() => handleClearForm(formik)}>
                         Clear
                       </MuiButton>
+                      </Grid>
+                      
+                     
+                      <Grid item xs={2}></Grid>
+                      <Grid item xs={1.2} style={{ marginTop: '20px' }}>
+                        <div>Partially Done</div>
+                        <div style={{ marginTop: '10px' }}>Not Done</div>
+                        <div style={{ marginTop: '10px' }}>All Done</div>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={0.8}
+                        style={{ marginTop: '20px', justifyContent: 'center', display: 'flex', flexDirection: 'column', alignItems: 'start' }}
+                      >
+                        <div>
+                          <PartiallyDone style={{ color: '#FF6C22' }} />
+                        </div>
+                        <div>
+                          <NotDone style={{ color: '#994D1C' }} />
+                        </div>
+                        <div>
+                          <AllDone style={{ color: '#008000' }} />
+                        </div>
+                      </Grid>
                     </Grid>
+
                     <Grid item xs={2}></Grid>
                     <Grid item xs={1.2} style={{ marginTop: '20px' }}>
                       <div>Partially Done</div>
@@ -237,6 +274,10 @@ function LabDashboard() {
                     </Grid>
                   </Grid>
                 </Form>
+
+                  </Form>
+                )}
+
               </Formik>
             </div>
           </Container>

@@ -42,7 +42,7 @@ const leftMenuitems = {
               type: 'item',
               icon: null,
               children: [],
-              url: '',
+              url: '/UserRegistration',
               target: false,
               breadcrumbs: false
             }

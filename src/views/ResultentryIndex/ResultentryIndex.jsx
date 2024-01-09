@@ -671,13 +671,18 @@ const ResultentryIndex = () => {
       headerName: '',
       flex: 1,
       headerClassName: 'super-app-theme--header',
-      renderCell: (params) =>
-        params.row.IsSampleCollected ? (
-          <CustomCheckbox
-            checked={selectedRows.some((row) => row.SmpColHeaderId === params.row.SmpColHeaderId)}
-            onChange={() => handleSelectionChange([params.row.SmpColHeaderId])}
-          />
-        ) : null
+      renderCell: (params) => {
+        if (params.row.IsSampleCollected) {
+          return params.row.IsVerificationDone ? null : (
+            <CustomCheckbox
+              checked={selectedRows.some((row) => row.SmpColHeaderId === params.row.SmpColHeaderId)}
+              onChange={() => handleSelectionChange([params.row.SmpColHeaderId])}
+            />
+          );
+        } else {
+          return null;
+        }
+      }
     },
     {
       field: 'TestName',

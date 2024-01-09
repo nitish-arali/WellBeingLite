@@ -48,6 +48,7 @@ export const urlLoadTestReferenceForResEntry=`${baseURL}/api/LabTestMaster/LoadT
 export const urlResultEntryIndex=`${baseURL}/api/Laboratory/ResultEntryIndex`; 
 export const urlGetSelectedTestDataForResEntry=`${baseURL}/api/Laboratory/GetSelectedTestDataForResEntry`; 
 export const urlSaveTestsResultEntry=`${baseURL}/api/Laboratory/SaveTestsResultEntry`; 
+export const urlSaveVerification=`${baseURL}/api/Laboratory/SaveTestVerifyStatus`; 
 export const urlGetSelectedTestDataForResEntered=`${baseURL}/api/Laboratory/GetSelectedTestDataForResEntered`; 
 export const urlLoadAllDropDownsTemplate=`${baseURL}/api/Template/GetAllDropDownDataForTemplates`; 
 export const urlSaveNewTemplate=`${baseURL}/api/Template/SaveNewMasterTemplate`; 
