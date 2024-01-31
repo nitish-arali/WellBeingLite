@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form } from 'formik';
 import clsx from 'clsx';
 import BackButton from '@mui/icons-material/KeyboardBackspace';
+import LabReport from 'components/LabReport/index';
 
 import HeadingComponent from '../../components/HeadingComponent/index';
 import customAxios from 'views/Patient/FormsUI/CustomAxios';
@@ -670,6 +671,11 @@ const VerificationIndex = () => {
                   </Dialog>
 
                   <Grid container display={'flex'} justifyContent={'end'} marginTop={2} marginRight={4}>
+                    <Grid item xs={2}>
+                      <MuiButton variant="contained" color="primary" onClick={() => navigate('./report')}>
+                        Report Page
+                      </MuiButton>
+                    </Grid>
                     <Grid item xs={1}>
                       <MuiButton variant="contained" color="primary" onClick={() => handleVerificationStatus(1)}>
                         Verify
