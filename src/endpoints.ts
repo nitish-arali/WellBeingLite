@@ -54,7 +54,13 @@ export const urlLoadAllDropDownsTemplate=`${baseURL}/api/Template/GetAllDropDown
 export const urlSaveNewTemplate=`${baseURL}/api/Template/SaveNewMasterTemplate`; 
 export const urlGetAllTemplates=`${baseURL}/api/Template/GetAllTemplates`; 
 export const urlEditTemplate=`${baseURL}/api/Template/EditTemplate`; 
+export const urlGetAllUsers=`${baseURL}/api/User/GetAllUsers`; 
 export const urlGetTemplateDataByTemplateId=`${baseURL}/api/Laboratory/GetTemplateDataByTemplateId`; 
+export const urlGetRoles=`${baseURL}/api/User/Create`; 
+export const urlAddUser=`${baseURL}/api/User/AddUser`; 
+export const urlDeleteAppUser=`${baseURL}/api/User/DeleteAppUser`; 
+export const urlGetGetAppUserbyId=`${baseURL}/api/User/GetAppUserbyId`; 
+export const urlGetAutocompleteProviders=`${baseURL}/api/User/AutoCompleteProviderNames`; 
 
 
 

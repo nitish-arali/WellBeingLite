@@ -4,6 +4,8 @@ import { CssBaseline, StyledEngineProvider } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
 // routing
 import Routes from 'routes';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 // defaultTheme
 import themes from 'themes';
