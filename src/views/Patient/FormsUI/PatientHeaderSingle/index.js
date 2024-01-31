@@ -74,14 +74,14 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
   const en3 = patientdata?.GeneratedEncounterId;
 
   const patientContent = (
-    <Grid container spacing={2} alignItems="center">
+    <Grid container spacing={2} alignItems="center" >
       <Grid item xs={1}>
         <Avatar src={showGenderPic(patientdata)} sx={{ width: 60, height: 60 }} />
       </Grid>
       <Grid item xs={3} sx={{ padding: '8px' }}>
-       <Typography variant="body2" component="div" sx={{ marginBottom: '8px' }}>
-  <span style={{ fontWeight: '700' }}>UhId:</span> {patientdata?.UhId || 'N/A'}
-</Typography>
+        <Typography variant="body2" component="div" sx={{ marginBottom: '8px' }}>
+          <span style={{ fontWeight: '700' }}>UhId:</span> {patientdata?.UhId || 'N/A'}
+        </Typography>
         <Typography variant="body2" component="div">
           <span style={{ fontWeight: '700' }}>VisitId:</span>
           {en3 ? (
@@ -97,13 +97,17 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
         <Typography variant="body1" component="div" sx={{ marginBottom: '8px' }}>
           <span style={{ fontWeight: '700' }}>{patientdata?.PatientName || 'N/A'}</span>
         </Typography>
-        <Typography variant="body2" component="div">{age}</Typography>
+        <Typography variant="body2" component="div">
+          {age}
+        </Typography>
       </Grid>
       <Grid item xs={1.5} sx={{ padding: '8px', position: 'relative' }}>
         <Typography variant="body2" component="div" sx={{ marginBottom: '8px' }}>
           {showGender(patientdata)}
         </Typography>
-        <Typography component="div" variant="body2">{dateOfBirth}</Typography>
+        <Typography component="div" variant="body2">
+          {dateOfBirth}
+        </Typography>
         <Box
           sx={{
             position: 'absolute',
@@ -133,9 +137,9 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
     <Box
       width={'100%'}
       height={'100px'}
-      border={3}
-      borderColor="#efebe9"
-      //backgroundColor="#ECF2FF"
+      border={5}
+      borderColor="#B6C4B6"
+      backgroundColor="#E0F4FF"
       // borderRadius={4}
       display="flex"
       alignItems="center"

@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router';
 import { makeStyles } from '@mui/styles';
 import TextField1 from 'views/Patient/FormsUI/Textfield/index.js';
 import TablePagination from '@mui/material/TablePagination';
+import BackButton from '@mui/icons-material/KeyboardBackspace';
 const CustomCheckbox = ({ checked, onChange }) => <input type="checkbox" checked={checked} onChange={onChange} />;
 const SampleCollectionIndex = () => {
   const { patientId, encounterId, labnumber } = useParams();
@@ -139,13 +140,15 @@ const SampleCollectionIndex = () => {
     { field: 'PatientNetAmount', headerName: 'Amount', headerClassName: 'super-app-theme--header', flex: 1 },
     { field: 'LabNumber', headerName: 'Lab Number', headerClassName: 'super-app-theme--header', flex: 1 }
   ];
+  const handleBackButton = () => {
+    navigate('/LabDashBoard');
+  };
   const handleButtonClick = (tab) => {
     debugger;
     if (tab == 'ResultEntry') {
       const url = `/ResultentryIndex/${patientId}/${encounterId}/${labnumber}`;
       navigate(url);
-    }
-  else  if (tab == 'Verification') {
+    } else if (tab == 'Verification') {
       const url = `/VerificationIndex/${patientId}/${encounterId}/${labnumber}`;
       navigate(url);
     }
@@ -157,13 +160,39 @@ const SampleCollectionIndex = () => {
       sx={{ width: '100%', backgroundColor: 'white', padding: '0', border: '2px solid #ccc', borderRadius: '10px', paddingBottom: '10px' }}
     >
       <Grid container width={'100%'}>
-        <Grid item xs={12}>
+        <Grid item xs={11}>
           <Typography
             variant="h4"
-            sx={{ backgroundColor: '#1E88E5', color: 'white', padding: '12px', borderRadius: '10px', fontSize: '20px', fontWeight: '400' }}
+            sx={{
+              backgroundColor: '#1E88E5',
+              color: 'white',
+              padding: '12px',
+              borderTopLeftRadius: '10px',
+              fontSize: '20px',
+              fontWeight: '400'
+            }}
           >
             Sample Collection
           </Typography>
+        </Grid>
+        <Grid
+          item
+          xs={1}
+          sx={{
+            backgroundColor: '#1E88E5',
+
+            borderTopRightRadius: '10px',
+            fontSize: '15px',
+            fontWeight: '400',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'end',
+            paddingRight: '10px'
+          }}
+        >
+          <IconButton sx={{ color: 'white' }}>
+            <BackButton sx={{ fontSize: '30px' }} onClick={handleBackButton} />
+          </IconButton>
         </Grid>
         <Grid item xs={12} sx={{ marginRight: '16px' }}>
           <div className={classes.formWrapper}>
@@ -216,6 +245,7 @@ const SampleCollectionIndex = () => {
                       <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
                     </div>
                   </Grid>
+
                   <Grid item xs={12}>
                     <Grid container spacing={2} marginLeft={'-10px'}>
                       <Grid item>
@@ -240,6 +270,7 @@ const SampleCollectionIndex = () => {
                       </Grid>
                     </Grid>
                   </Grid>
+
                   <Grid item xs={12}>
                     <Box
                       sx={{
@@ -260,8 +291,8 @@ const SampleCollectionIndex = () => {
                             return params.row.IsSampleCollected ? 'highlight' : '';
                           }}
                           getRowId={(row) => row.SmpColHeaderId}
-                          getRowHeight={() => 40} // Set the desired height here
-                          columnHeaderHeight={40}
+                          getRowHeight={() => 35} // Set the desired height here
+                          columnHeaderHeight={35}
                           sx={{
                             marginLeft: '4px',
                             marginRight: '4px',

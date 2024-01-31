@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-//import {  Typography, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Button from 'views/Patient/FormsUI/Button';
 import MuiButton from '@mui/material/Button';
 //import { makeStyles } from '@mui/styles';
@@ -9,14 +9,20 @@ import { Container } from '@mui/system';
 import 'react-toastify/dist/ReactToastify.css';
 import { Formik, Form } from 'formik';
 import clsx from 'clsx';
+import BackButton from '@mui/icons-material/KeyboardBackspace';
+
+import HeadingComponent from '../../components/HeadingComponent/index';
 import customAxios from 'views/Patient/FormsUI/CustomAxios';
 import {
   urlResultEntryIndex,
   urlGetPatientHeaderWithPatientIAndEncounterId,
-  urlSaveVerification,
+  urlLoadTestReferenceForResEntry,
   urlGetSelectedTestDataForResEntered,
   urlSaveTestsResultEntry,
-
+  urlSaveSampleColResult,
+  urlLoadTestMethodGridData,
+  urlLoadTestReferenceGrid,
+  urlGetSelectedTestDataForResEntry
 } from 'endpoints.ts';
 //import CustomAutocomplete from 'views/Patient/FormsUI/Autocomplete';
 import GeneralAutoComplete from 'views/Patient/FormsUI/GeneralAutoComplete';
@@ -76,6 +82,7 @@ const VerificationIndex = () => {
         if (response.status === 200) {
           const patientdetail = response.data.data.EncounterModel;
           setPatientdata(patientdetail);
+          console.log('this' + patientdata);
         } else {
           console.error('Failed to fetch patient details');
         }
@@ -112,9 +119,73 @@ const VerificationIndex = () => {
     }
   };
 
+  // const handleBackButton = () => {
+  //   navigate('/');
+  // };
+
   useEffect(() => {
     fetchChargeDetails();
   }, [patientId, encounterId, labnumber]);
+
+  const handleVerificationStatus = async (VerifyStatus) => {
+    debugger;
+    const intverifystatus = parseInt(VerifyStatus);
+
+    let newBoolVerifyStatus;
+    if (intverifystatus === 0) {
+      newBoolVerifyStatus = false;
+    } else if (intverifystatus === 1) {
+      newBoolVerifyStatus = true;
+    } else {
+      toast.warn('There Is A Problem Verifying A Test.');
+      return;
+    }
+
+    // setBoolverifyStatus(newBoolVerifyStatus);
+    const row = selectedRows[0];
+
+    if (row != null) {
+      if (row.IsVerificationDone && intverifystatus === 1) {
+        toast.warn('This Test Is Already Verified......');
+        return false;
+      } else if (!row.IsVerificationDone && intverifystatus === 0) {
+        toast.warn('Please Verify the Test To Unverify.');
+        return false;
+      } else {
+        if (row.IsResultEntryDone) {
+          row.IsVerificationDone = newBoolVerifyStatus;
+        }
+      }
+      if (row != null) {
+        try {
+          const response = await customAxios.post(urlSaveVerification, row, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.data.data.Status !== '') {
+            var message = response.data.data.Status;
+            if (message.includes('Data Saved Successfully.')) {
+              toast.success(message);
+              // resetForm();
+
+              setSelectedRows([]);
+              setloadTableGrid([]);
+
+              fetchChargeDetails();
+            }
+          } else {
+            toast.error('Something Went Wrong....');
+          }
+        } catch (error) {
+          alert('errorr');
+        }
+      }
+    } else {
+      toast.warn('Please Select Sample.....');
+    }
+  };
 
   const handleSelectionChange = (newSelection) => {
     debugger;
@@ -140,7 +211,7 @@ const VerificationIndex = () => {
       console.log('Selected Rows Data:', selectedRowsData);
 
       // Update the state with the new selection
-      setSelectedRows(selectedRowsData);
+      setSelectedRows(newSelectedRows);
       if (isSelected == true) {
         setloadTableGrid([]);
         setSelectedRows([]);
@@ -149,8 +220,7 @@ const VerificationIndex = () => {
       } else {
         if (selectedRowsData[0].IsResultEntryDone == true) {
           LoadAlreadyResEnteredTests(selectedRowsData[0].TestId, selectedRowsData[0].ChargeId);
-        }
-        else {
+        } else {
           setloadTableGrid([]);
         }
       }
@@ -170,10 +240,9 @@ const VerificationIndex = () => {
   }));
   const classes = useStyles();
 
-
   const handleTemplateClick = async (testId, ChargeId) => {
     debugger;
-    const row = loadTableGrid.find(item => item.ChargeId === ChargeId);
+    const row = loadTableGrid.find((item) => item.ChargeId === ChargeId);
     const TempID = row.TemplateId;
     setEditorData(row.ObservedValues);
     setDialogOpen(true);
@@ -192,10 +261,6 @@ const VerificationIndex = () => {
         );
         if (GetSelectedTestDataForResEntry.data && Array.isArray(GetSelectedTestDataForResEntry.data.data.ResultEntryList)) {
           setloadTableGrid(GetSelectedTestDataForResEntry.data.data.ResultEntryList);
-
-
-
-
         } else {
           setloadTableGrid([]);
         }
@@ -228,7 +293,7 @@ const VerificationIndex = () => {
             checked={selectedRows.some((row) => row.SmpColHeaderId === params.row.SmpColHeaderId)}
             onChange={() => handleSelectionChange([params.row.SmpColHeaderId])}
           />
-        ) : null,
+        ) : null
     },
     {
       field: 'TestName',
@@ -251,18 +316,22 @@ const VerificationIndex = () => {
       renderCell: (params) => {
         if (params.row.IsTemplateTest) {
           return (
-            <a href="#" onClick={() => handleTemplateClick(params.row.TestId, params.row.ChargeId)}>Template</a>
+            <a href="#" onClick={() => handleTemplateClick(params.row.TestId, params.row.ChargeId)}>
+              Template
+            </a>
           );
         } else {
           return (
-            <div style={{
-              backgroundColor: params.row.IsResultNormal === false ? 'red' : 'none',
-              height: '100%',
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'left'
-            }}>
+            <div
+              style={{
+                backgroundColor: params.row.IsResultNormal === false ? 'red' : 'none',
+                height: '100%',
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'left'
+              }}
+            >
               {params.value}
             </div>
           );
@@ -274,194 +343,171 @@ const VerificationIndex = () => {
       field: 'MethodName',
       headerName: 'Method',
       flex: 1,
-      headerClassName: 'super-app-theme--header',
-
+      headerClassName: 'super-app-theme--header'
     },
     {
       field: 'TestRefDescription',
       headerName: 'Normal Ranges',
       headerClassName: 'super-app-theme--header',
-      flex: 1,
-
+      flex: 1
     }
   ];
 
-  //const [boolverifyStatus, setBoolverifyStatus] = useState();
-  const handleVerificationStatus = async (VerifyStatus) => {
+  const updateLoadTableGrid = (originalLoadTableGrid, refrangedesc, selectedMethodValues) => {
     debugger;
-    const intverifystatus = parseInt(VerifyStatus);
+    const updatedLoadTableGrid = originalLoadTableGrid.map((entry) => {
+      const refrangedescForTestId = refrangedesc[entry.TestId] || '';
+      let methodForTestId = selectedMethodValues[entry.TestId] || '';
 
-  
-    let newBoolVerifyStatus;
-    if (intverifystatus === 0) {
-      newBoolVerifyStatus = false;
-    } else if (intverifystatus === 1) {
-      newBoolVerifyStatus = true;
-    } else {
-      toast.warn('There Is A Problem Verifying A Test.');
+      if (methodForTestId === 'NoMethod' || methodForTestId === '') {
+        methodForTestId = null;
+      }
+      return {
+        ...entry,
+        TestRefDescription: refrangedescForTestId,
+        MethodsID: methodForTestId,
+        PatientId: patientId,
+        EncounterId: encounterId
+      };
+    });
+
+    return updatedLoadTableGrid;
+  };
+  const handleSubmit = async (values, { resetForm }) => {
+    debugger;
+    console.log('data', loadTableGrid);
+    if (loadTableGrid.length == 0) {
+      toast.warning('Please Select Any One Test.');
+    }
+    const updatedLoadTableGrid1 = updateLoadTableGrid(loadTableGrid, refrangedesc, selectedMethodValues);
+    // Check if any ObservedValues is null or an empty string
+    //const hasNullObservedValues = updatedLoadTableGrid1.some(entry => entry.ObservedValues === null || entry.ObservedValues === '');
+    const hasNullObservedValues = updatedLoadTableGrid1.some((entry) => {
+      // Check if IsProfileTest is false and ObservedValues is null or empty
+      return !entry.IsProfileTest && (entry.ObservedValues === null || entry.ObservedValues === '');
+    });
+    // Show alert if there are null or empty ObservedValues
+    if (hasNullObservedValues) {
+      //alert('ObservedValues cannot be null or empty.');
+      toast.error('ObservedValues cannot be null or empty.');
       return;
     }
-  
-   // setBoolverifyStatus(newBoolVerifyStatus);
-    const row = selectedRows[0];
+    console.log('data', updatedLoadTableGrid1);
 
+    try {
+      const response = await customAxios.post(urlSaveTestsResultEntry, updatedLoadTableGrid1, {
+        params: {
+          PatientAge: patientAge
+        },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
+      if (response.data.data.Status !== '') {
+        var message = response.data.data.Status;
+        if (message.includes('Result Entry Saved Successfully.') || message.includes('Result Entry Updated Successfully.')) {
+          toast.success(message);
+          resetForm();
 
-    
-    if (row != null) {
-      if (row.IsVerificationDone && intverifystatus === 1) {
-        toast.warn('This Test Is Already Verified......');
-        return false;
-      } else if (!row.IsVerificationDone && intverifystatus === 0) {
-        toast.warn('Please Verify the Test To Unverify.');
-        return false;
+          setSelectedRows([]);
+          setloadTableGrid([]);
+          setSelectedMethodValues([]);
+          setRefrangedesc([]);
+          fetchChargeDetails();
+        }
       } else {
-        if (row.IsResultEntryDone) {
-          row.IsVerificationDone = newBoolVerifyStatus;
-
-        }
+        toast.error('Something Went Wrong....');
       }
-      if (row != null ) {
-        try {
-          const response = await customAxios.post(urlSaveVerification, row, {
-
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if (response.data.data.Status !== '') {
-            var message = response.data.data.Status;
-            if (message.includes('Data Saved Successfully.')) {
-              toast.success(message);
-             // resetForm();
-
-              setSelectedRows([]);
-              setloadTableGrid([]);
-
-              fetchChargeDetails();
-            }
-          } else {
-            toast.error('Something Went Wrong....');
-          }
-        } catch (error) {
-          alert('errorr');
-        }
-      }
-
-    }
-    else {
-      toast.warn('Please Select Sample.....');
+    } catch (error) {
+      alert('errorr');
     }
   };
-
-
-  // const updateLoadTableGrid = (originalLoadTableGrid, refrangedesc, selectedMethodValues) => {
-  //   debugger;
-  //   const updatedLoadTableGrid = originalLoadTableGrid.map((entry) => {
-  //     const refrangedescForTestId = refrangedesc[entry.TestId] || '';
-  //     let methodForTestId = selectedMethodValues[entry.TestId] || '';
-
-  //     if (methodForTestId === 'NoMethod' || methodForTestId === '') {
-  //       methodForTestId = null;
-  //     }
-  //     return {
-  //       ...entry,
-  //       TestRefDescription: refrangedescForTestId,
-  //       MethodsID: methodForTestId,
-  //       PatientId: patientId,
-  //       EncounterId: encounterId
-  //     };
-  //   });
-
-  //   return updatedLoadTableGrid;
-  // };
-  // const handleSubmit = async (values, { resetForm }) => {
-  //   debugger;
-  //   console.log('data', loadTableGrid);
-  //   if (loadTableGrid.length == 0) {
-  //     toast.warning('Please Select Any One Test.');
-  //   }
-  //   const updatedLoadTableGrid1 = updateLoadTableGrid(loadTableGrid, refrangedesc, selectedMethodValues);
-  //   // Check if any ObservedValues is null or an empty string
-  //   //const hasNullObservedValues = updatedLoadTableGrid1.some(entry => entry.ObservedValues === null || entry.ObservedValues === '');
-  //   const hasNullObservedValues = updatedLoadTableGrid1.some((entry) => {
-  //     // Check if IsProfileTest is false and ObservedValues is null or empty
-  //     return !entry.IsProfileTest && (entry.ObservedValues === null || entry.ObservedValues === '');
-  //   });
-  //   // Show alert if there are null or empty ObservedValues
-  //   if (hasNullObservedValues) {
-  //     //alert('ObservedValues cannot be null or empty.');
-  //     toast.error('ObservedValues cannot be null or empty.');
-  //     return;
-  //   }
-  //   console.log('data', updatedLoadTableGrid1);
-
-  //   try {
-  //     const response = await customAxios.post(urlSaveTestsResultEntry, updatedLoadTableGrid1, {
-  //       params: {
-  //         PatientAge: patientAge
-  //       },
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-
-  //     if (response.data.data.Status !== '') {
-  //       var message = response.data.data.Status;
-  //       if (message.includes('Result Entry Saved Successfully.') || message.includes('Result Entry Updated Successfully.')) {
-  //         toast.success(message);
-  //         resetForm();
-
-  //         setSelectedRows([]);
-  //         setloadTableGrid([]);
-  //         setSelectedMethodValues([]);
-  //         setRefrangedesc([]);
-  //         fetchChargeDetails();
-  //       }
-  //     } else {
-  //       toast.error('Something Went Wrong....');
-  //     }
-  //   } catch (error) {
-  //     alert('errorr');
-  //   }
-  // };
 
   const handleButtonClick = (tab) => {
     debugger;
     if (tab == 'SampleCollection') {
       const url = `/SampleCollectionIndex/${patientId}/${encounterId}/${labnumber}`;
       navigate(url);
-    }
-    else if (tab == 'ResultEntry') {
+    } else if (tab == 'ResultEntry') {
       const url = `/ResultentryIndex/${patientId}/${encounterId}/${labnumber}`;
       navigate(url);
     }
   };
   const encounterId1 = 0;
   return (
-    <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
+    <Box
+      sx={{
+        width: '100%',
+        backgroundColor: 'white',
+        padding: '0',
+        border: '2px solid #ccc',
+        borderRadius: '10px',
+        paddingBottom: '10px'
+      }}
+    >
       <Grid container width={'100%'}>
-        <Grid item xs={12}>
+        <Grid item xs={11}>
+          <Typography
+            variant="h4"
+            sx={{
+              backgroundColor: '#1E88E5',
+              color: 'white',
+              padding: '12px',
+              borderTopLeftRadius: '10px',
+              fontSize: '20px',
+              fontWeight: '400'
+            }}
+          >
+            Verification
+          </Typography>
+        </Grid>
+        <Grid
+          item
+          xs={1}
+          sx={{
+            backgroundColor: '#1E88E5',
 
+            borderTopRightRadius: '10px',
+            fontSize: '15px',
+            fontWeight: '400',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'end',
+            paddingRight: '10px'
+          }}
+        >
+          <IconButton sx={{ color: 'white' }}>
+            <BackButton
+              sx={{ fontSize: '30px' }}
+              // onClick={handleBackButton}
+            />
+          </IconButton>
+        </Grid>
+        <Grid item xs={12} sx={{ marginRight: '16px' }}>
           <div className={classes.formWrapper}>
             <Formik
               initialValues={{ ...initialFormState }}
-            // validationSchema={FORM_VALIDATION}
-            //onSubmit={handleSubmit}
+              // validationSchema={FORM_VALIDATION}
+              onSubmit={handleSubmit}
             >
               <Form>
-                <Grid container spacing={2}>
+                <div style={{ border: '2px solid #ccc', padding: '10px', marginLeft: '16px', borderRadius: '5px' }}>
+                  <Grid item xs={12} marginX={'5px'} borderRadius={'10px'}>
+                    <div>
+                      <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
+                    </div>
+                  </Grid>
+
                   <Grid item xs={12}>
-                    <Typography variant="h3">Verification</Typography>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={2} marginLeft={'-10px'}>
                       <Grid item>
-                        <MuiButton variant="contained" onClick={() => handleButtonClick('SampleCollection')}>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('SampleCollection')}>
                           Sample Collection
                         </MuiButton>
                       </Grid>
                       <Grid item>
-                        <MuiButton variant="contained" onClick={() => handleButtonClick('ResultEntry')}>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('ResultEntry')}>
                           Result Entry
                         </MuiButton>
                       </Grid>
@@ -471,17 +517,17 @@ const VerificationIndex = () => {
                         </MuiButton>
                       </Grid>
                       <Grid item>
-                        <MuiButton variant="contained" onClick={() => handleButtonClick('Report')}>
+                        <MuiButton variant="outlined" onClick={() => handleButtonClick('Report')}>
                           Report
                         </MuiButton>
                       </Grid>
                     </Grid>
-                    <PatientHeaderSingle patientdata={patientdata} encounterId={encounterId1} />
                   </Grid>
+
                   <Grid item xs={12}>
                     <Box
                       sx={{
-                        height: 300,
+                        // height: 300,
                         width: '100%',
                         '& .super-app-theme--header': {
                           backgroundColor: 'rgba(0, 123, 255, 0.8)',
@@ -491,51 +537,54 @@ const VerificationIndex = () => {
                       }}
                     >
                       <TableContainer component={Paper}>
-                        <div>
-                          <DataGrid
-                            rows={chargeDetails}
-                            columns={columns}
-                            //checkboxSelection
-                            onRowSelectionModelChange={(newSelection) => handleSelectionChange(newSelection)}
-                            initialState={{
-                              ...chargeDetails,
-                              pagination: { paginationModel: { pageSize: 5 } }
-                            }}
-                            getRowClassName={(params) => {
-                              return params.row.IsVerificationDone ? 'highlight' : '';
-                            }}
-                            sx={{
-                              '.highlight': {
-                                bgcolor: 'green',
-                                color: 'white', // Set the font color to white or any other color you prefer
-                                fontWeight: 'bold', // Optionally, you can set the font weight
-                                '&:hover': {
-                                  bgcolor: 'green'
-                                }
+                        <DataGrid
+                          rows={chargeDetails}
+                          columns={columns}
+                          //checkboxSelection
+                          onRowSelectionModelChange={(newSelection) => handleSelectionChange(newSelection)}
+                          getRowClassName={(params) => {
+                            return params.row.IsResultEntryDone ? 'highlight' : '';
+                          }}
+                          getRowHeight={() => 35} // Set the desired height here
+                          columnHeaderHeight={35}
+                          sx={{
+                            marginLeft: '4px',
+                            marginRight: '4px',
+                            marginTop: '10px',
+                            '.highlight': {
+                              bgcolor: 'green',
+                              color: 'white', // Set the font color to white or any other color you prefer
+                              fontWeight: 'bold', // Optionally, you can set the font weight
+                              '&:hover': {
+                                bgcolor: 'green'
                               }
-                            }}
-                            pageSizeOptions={[5, 10, 25]}
-                            disableColumnFilter
-                            disableColumnSelector
-                            disableDensitySelector
-                            disableRowSelectionOnClick
-                            slots={{ toolbar: GridToolbar }}
-                            getRowId={(row) => row.SmpColHeaderId}
-                            // style={{
-                            //     border: '1px solid #ddd',
-                            //     borderRadius: '5px',
-                            //     boxShadow: '0px 2px 6px #aaa',
-                            // }}
-                            slotProps={{
-                              toolbar: {
-                                showQuickFilter: true,
-                                quickFilterProps: { debounceMs: 500 },
-                                printOptions: { disableToolbarButton: true },
-                                csvOptions: { disableToolbarButton: true }
-                              }
-                            }}
-                          />
-                        </div>
+                            },
+                            '& .MuiDataGrid-cell': {
+                              border: '1px solid #ccc',
+                              borderBottom: '1px solid #ccc'
+                            },
+                            '& .MuiDataGrid-columnHeader': {
+                              borderLeft: '1px solid #ccc',
+                              borderTop: '1px solid #ccc'
+                            }
+                          }}
+                          hideFooterPagination
+                          hideFooter
+                          disableColumnFilter
+                          disableColumnSelector
+                          disableDensitySelector
+                          disableRowSelectionOnClick
+                          slots={{ toolbar: GridToolbar }}
+                          getRowId={(row) => row.SmpColHeaderId}
+                          slotProps={{
+                            toolbar: {
+                              showQuickFilter: false,
+                              quickFilterProps: { debounceMs: 500 },
+                              printOptions: { disableToolbarButton: true },
+                              csvOptions: { disableToolbarButton: true }
+                            }
+                          }}
+                        />
                       </TableContainer>
                     </Box>
                   </Grid>
@@ -543,7 +592,7 @@ const VerificationIndex = () => {
                   <Grid item xs={12}>
                     <Box
                       sx={{
-                        height: 300,
+                        // height: 300,
                         width: '100%',
                         '& .super-app-theme--header': {
                           backgroundColor: 'rgba(0, 123, 255, 0.8)',
@@ -558,11 +607,8 @@ const VerificationIndex = () => {
                             autoHeight
                             rows={loadTableGrid}
                             columns={columns1}
-                            initialState={{
-                              ...loadTableGrid,
-                              pagination: { paginationModel: { pageSize: 5 } }
-                            }}
-                            pageSizeOptions={[5, 10, 25]}
+                            hideFooterPagination
+                            hideFooter
                             disableColumnFilter
                             disableColumnSelector
                             disableDensitySelector
@@ -572,7 +618,12 @@ const VerificationIndex = () => {
                             getRowClassName={(params) => {
                               return params.row.IsProfileTest ? 'highlight' : '';
                             }}
+                            getRowHeight={() => 35} // Set the desired height here
+                            columnHeaderHeight={35}
                             sx={{
+                              marginLeft: '4px',
+                              marginRight: '4px',
+                              marginTop: '10px',
                               '.highlight': {
                                 bgcolor: 'teal',
                                 color: 'white', // Set the font color to white or any other color you prefer
@@ -580,11 +631,19 @@ const VerificationIndex = () => {
                                 '&:hover': {
                                   bgcolor: 'teal'
                                 }
+                              },
+                              '& .MuiDataGrid-cell': {
+                                border: '1px solid #ccc',
+                                borderBottom: '1px solid #ccc'
+                              },
+                              '& .MuiDataGrid-columnHeader': {
+                                borderLeft: '1px solid #ccc',
+                                borderTop: '1px solid #ccc'
                               }
                             }}
                             slotProps={{
                               toolbar: {
-                                showQuickFilter: true,
+                                showQuickFilter: false,
                                 quickFilterProps: { debounceMs: 500 },
                                 printOptions: { disableToolbarButton: true },
                                 csvOptions: { disableToolbarButton: true }
@@ -594,35 +653,8 @@ const VerificationIndex = () => {
                         </div>
                       </TableContainer>
                     </Box>
-                  
-                    <Grid
-                        container
-                        spacing={2}
-                        sx={{
-                          // padding: '10px',
-                          marginLeft: '0px',
-                          marginTop: '0px',
-                          paddingBottom: '20px',
-                          // width: '100%',
-                          // border: '1px solid #ccc',
-                          // borderRadius: '5px',
-                          // marginLeft: '18px',
-                          marginRight: '0%'
-                        }}
-                      >
-                         <Grid item xs={8}></Grid>
-                      <Grid item xs={1}>
-                        <MuiButton variant='contained' color='primary' onClick={() => handleVerificationStatus(1)}>Verify</MuiButton>
-                      </Grid>
-                      <Grid item xs={1}>
-                        <MuiButton variant='contained' color='error' onClick={() => handleVerificationStatus(0)}>UnVerify</MuiButton>
-                      </Grid>
-                      </Grid>
-
-
-
                   </Grid>
-                  <Dialog open={dialogOpen} classes={{ paper: classes.dialog }} maxWidth={false} >
+                  <Dialog open={dialogOpen} classes={{ paper: classes.dialog }} maxWidth={false}>
                     <DialogTitle variant="h3">Template</DialogTitle>
                     <DialogContent>
                       <Grid item xs={12}>
@@ -631,18 +663,30 @@ const VerificationIndex = () => {
                       </Grid>
                     </DialogContent>
                     <DialogActions>
-                      <MuiButton variant='contained' color='primary' onClick={CancelTemplate}>Cancel</MuiButton>
+                      <MuiButton variant="contained" color="primary" onClick={CancelTemplate}>
+                        Cancel
+                      </MuiButton>
                     </DialogActions>
                   </Dialog>
 
-
-                </Grid>
+                  <Grid container display={'flex'} justifyContent={'end'} marginTop={2} marginRight={4}>
+                    <Grid item xs={1}>
+                      <MuiButton variant="contained" color="primary" onClick={() => handleVerificationStatus(1)}>
+                        Verify
+                      </MuiButton>
+                    </Grid>
+                    <Grid item xs={1}>
+                      <MuiButton variant="contained" color="error" onClick={() => handleVerificationStatus(0)}>
+                        UnVerify
+                      </MuiButton>
+                    </Grid>
+                  </Grid>
+                </div>
               </Form>
             </Formik>
           </div>
         </Grid>
       </Grid>
-
     </Box>
   );
 };
