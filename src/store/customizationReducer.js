@@ -5,12 +5,13 @@ import config from 'config';
 import * as actionTypes from './actions';
 
 export const initialState = {
-  isOpen: [], // for active default menu
+  isOpen: [], // for active default menu 
   defaultId: 'default',
   fontFamily: config.fontFamily,
   borderRadius: config.borderRadius,
   opened: true,
-  auth : false
+  auth : false,
+  leftMenuItems: null,
 };
 
 // ==============================|| CUSTOMIZATION REDUCER ||============================== //
@@ -39,10 +40,12 @@ const customizationReducer = (state = initialState, action) => {
         ...state,
         borderRadius: action.borderRadius
       };
-      // case action.auth:
-      //   return {
-      //     auth : true
-      //   }
+     
+    case actionTypes.SET_LEFT_MENU_ITEMS: // Correctly prefixed with the namespace
+    return {
+      ...state,
+      leftMenuItems: action.payload,
+    };
     default:
       return state;
   }

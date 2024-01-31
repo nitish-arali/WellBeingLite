@@ -1,51 +1,89 @@
-import React, { useState } from 'react';
-import { Button, TextField } from '@mui/material';
+import React from 'react';
+import { Button, Checkbox, Form, Input, notification } from 'antd';
 
-function ContainerDefinitions() {
-  const [value, setValue] = useState('');
-  const [error, setError] = useState(false);
+const onFinish = (values) => {
+  console.log('Success:', values);
+  notification.success({
+    message: 'Form Submission',
+    description: 'Form submitted successfully!',
+  });
+};
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (value.trim() === '') {
-      setError(true);
-    } else {
-      setError(false);
-      // Handle form submission here
-      console.log(value);
-    }
-  };
+const onFinishFailed = ({ errorFields }) => {
+  console.log('Failed:', errorFields);
+  notification.error({
+    message: 'Form Submission',
+    description: 'Please fill all required fields!',
+  });
+};
 
-  const handleChange = (event) => {
-    setValue(event.target.value);
-    if (event.target.value.trim() === '') {
-      setError(true);
-    } else {
-      setError(false);
-    }
-  };
-  const handleBlur = () => {
-    if (value.trim() === '') {
-      setError(true);
-    } else {
-      setError(false);
-    }
-  };
+const ContainerDefinitions = () => (
+  <Form
+    name="basic"
+    labelCol={{
+      span: 8,
+    }}
+    wrapperCol={{
+      span: 16,
+    }}
+    style={{
+      maxWidth: 600,
+    }}
+    initialValues={{
+      remember: true,
+    }}
+    onFinish={onFinish}
+    onFinishFailed={onFinishFailed}
+    autoComplete="off"
+  >
+    <Form.Item
+      label="Username"
+      name="username"
+      rules={[
+        {
+          required: true,
+          message: 'Please input your username!',
+        },
+      ]}
+    >
+      <Input />
+    </Form.Item>
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <TextField
-        error={error}
-        helperText={error ? 'This field is required' : ''}
-        label="My TextField"
-        value={value}
-        onChange={handleChange}
-        onBlur={handleBlur}
-      />
-      
-      <Button type="submit">Submit</Button>
-    </form>
-  );
-}
+    <Form.Item
+      label="Password"
+      name="password"
+      rules={[
+        {
+          required: true,
+          message: 'Please input your password!',
+        },
+      ]}
+    >
+      <Input.Password />
+    </Form.Item>
+
+    <Form.Item
+      name="remember"
+      valuePropName="checked"
+      wrapperCol={{
+        offset: 8,
+        span: 16,
+      }}
+    >
+      <Checkbox>Remember me</Checkbox>
+    </Form.Item>
+
+    <Form.Item
+      wrapperCol={{
+        offset: 8,
+        span: 16,
+      }}
+    >
+      <Button type="primary" htmlType="submit">
+        Submit
+      </Button>
+    </Form.Item>
+  </Form>
+);
 
 export default ContainerDefinitions;

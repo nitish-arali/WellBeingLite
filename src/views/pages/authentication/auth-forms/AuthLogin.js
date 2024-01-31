@@ -23,6 +23,7 @@ import {
   Stack,
   Typography
 } from '@mui/material';
+import { useDispatch } from 'react-redux';
 
 import { Formik } from 'formik';
 
@@ -33,10 +34,13 @@ import AnimateButton from 'ui-component/extended/AnimateButton';
 // assets
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+//import { setMenuItems } from '../../../../store/actions.js';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
 const Login = ({ ...others }) => {
+  const dispatch = useDispatch();
+
   const theme = useTheme();
   const scriptedRef = useScriptRef();
   const navigate = useNavigate();
@@ -84,7 +88,12 @@ const Login = ({ ...others }) => {
                 })
                 .then((response) => {
                   // Handle the response data here
-                  console.log('Response:', response.data);
+                  // console.log('Response:', response.data.header.leftMenu);
+                  const updatedMenuItems = response.data.header.leftMenu;
+                  // Dispatch the action to update the menu items in Redux store
+                  //dispatch(setMenuItems({ items: [updatedMenuItems] }));
+                  sessionStorage.setItem('leftmenu', JSON.stringify(updatedMenuItems));
+               
                   stopLoading();
                   //alert(JSON.stringify(response.data));
                   if (response.data.header.userContext.isAuthenticated == true) {

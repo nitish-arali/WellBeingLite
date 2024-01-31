@@ -31,7 +31,10 @@ const VerificationIndex = Loadable(lazy(() => import('views/VerificationIndex/Ve
 const NewPatient = Loadable(lazy(() => import('views/Patient/FormsUI/NewPatient')));
 const NewVisit = Loadable(lazy(() => import('views/Patient/FormsUI/NewVisit')));
 const ShowTemplate = Loadable(lazy(() => import('views/ShowTemplate/index')));
-const UserRegistration = Loadable(lazy(() => import('views/UserRegistration/UserRegistration')));
+const UserRegistration = Loadable(lazy(() => import('views/UserScreen/UserScreen')));
+const CreateUser = Loadable(lazy(() => import('views/CreateUser/CreateUser')));
+const RoleAccess = Loadable(lazy(() => import('views/RoleAccess/index')));
+
 
 const MainRoutes = {
   path: '/',
@@ -95,6 +98,10 @@ const MainRoutes = {
     {
       path: 'ShowTemplate/:Tid',
       element: <ShowTemplate />
+    },
+    {
+      path: 'CreateUser',
+      element: <CreateUser />
     },
     {
       path: 'billing',
@@ -193,6 +200,15 @@ const MainRoutes = {
         {
           path: '/UserRegistration',
           element: <UserRegistration />
+        }
+      ]
+    },
+    {
+      path: 'RoleAccess',
+      children: [
+        {
+          path: '/RoleAccess',
+          element: <RoleAccess />
         }
       ]
     },
