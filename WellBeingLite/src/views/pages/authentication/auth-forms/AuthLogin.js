@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useLoader from '../../../../hooks/useLoader.js';
 import CustomLoader from '../../../Patient/FormsUI/CustomLoader';
-
+import { setLeftMenuItems } from 'store/actions.js';
 import { useTheme } from '@mui/material/styles';
 import '../../../../css/loader.css';
 import { jwtDecode } from 'jwt-decode';
@@ -91,9 +91,10 @@ const Login = ({ ...others }) => {
                   // console.log('Response:', response.data.header.leftMenu);
                   const updatedMenuItems = response.data.header.leftMenu;
                   // Dispatch the action to update the menu items in Redux store
-                  //dispatch(setMenuItems({ items: [updatedMenuItems] }));
-                  sessionStorage.setItem('leftmenu', JSON.stringify(updatedMenuItems));
-               
+                  console.log("Login",updatedMenuItems);
+                  dispatch(setLeftMenuItems({ items: [updatedMenuItems] }));
+                  sessionStorage.setItem('leftmenu', JSON.stringify({items:[updatedMenuItems]}));
+
                   stopLoading();
                   //alert(JSON.stringify(response.data));
                   if (response.data.header.userContext.isAuthenticated == true) {

@@ -11,7 +11,7 @@ export const initialState = {
   borderRadius: config.borderRadius,
   opened: true,
   auth : false,
-  leftMenuItems: null,
+  leftMenuItems: {},
 };
 
 // ==============================|| CUSTOMIZATION REDUCER ||============================== //

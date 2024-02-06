@@ -10,5 +10,3 @@ export const setLeftMenuItems = (menuItems) => ({
   type: SET_LEFT_MENU_ITEMS,
   payload: menuItems
 });
-
-

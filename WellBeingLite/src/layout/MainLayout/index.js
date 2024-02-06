@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Outlet} from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
 // material-ui
 import { styled, useTheme } from '@mui/material/styles';
@@ -54,8 +54,10 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({
 // ==============================|| MAIN LAYOUT ||============================== //
 
 const MainLayout = () => {
-
-
+  const nav = useSelector((state) => state.customization);
+  console.log("store nav",nav.leftMenuItems);
+  console.log("og nav",navigation);
+  
   const theme = useTheme();
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
   // Handle left drawer
@@ -66,7 +68,6 @@ const MainLayout = () => {
   };
 
   return (
-
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       {/* header */}
@@ -91,7 +92,7 @@ const MainLayout = () => {
       {/* main content */}
       <Main theme={theme} open={leftDrawerOpened}>
         {/* breadcrumb */}
-        <Breadcrumbs separator={IconChevronRight} navigation={navigation} icon title rightAlign />
+        <Breadcrumbs separator={IconChevronRight} navigation={nav.leftMenuItems} icon title rightAlign />
         <Outlet />
       </Main>
       <Customization />

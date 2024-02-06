@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://smilesinmilez.com/",
   "dependencies": {
+    "@ant-design/icons": "^5.3.0",
     "@ckeditor/ckeditor5-build-classic": "^40.1.0",
     "@ckeditor/ckeditor5-font": "^40.1.0",
     "@ckeditor/ckeditor5-react": "^6.1.0",
