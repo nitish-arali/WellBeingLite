@@ -19,10 +19,8 @@ import {
   urlLoadTestReferenceForResEntry,
   urlGetSelectedTestDataForResEntered,
   urlSaveTestsResultEntry,
-  urlSaveSampleColResult,
-  urlLoadTestMethodGridData,
-  urlLoadTestReferenceGrid,
-  urlGetSelectedTestDataForResEntry
+  urlSaveVerification
+
 } from 'endpoints.ts';
 //import CustomAutocomplete from 'views/Patient/FormsUI/Autocomplete';
 import GeneralAutoComplete from 'views/Patient/FormsUI/GeneralAutoComplete';
@@ -142,23 +140,26 @@ const VerificationIndex = () => {
     }
 
     // setBoolverifyStatus(newBoolVerifyStatus);
-    const row = selectedRows[0];
+    const headerId = selectedRows[0].SmpColHeaderId;
+      // const headerid=selectedRows;
+    const RowsData = chargeDetails.filter((row) => row.SmpColHeaderId === headerId);
 
-    if (row != null) {
-      if (row.IsVerificationDone && intverifystatus === 1) {
+    if (RowsData != null) {
+      if (RowsData.IsVerificationDone && intverifystatus === 1) {
         toast.warn('This Test Is Already Verified......');
         return false;
-      } else if (!row.IsVerificationDone && intverifystatus === 0) {
+      } else if (!RowsData.IsVerificationDone && intverifystatus === 0) {
         toast.warn('Please Verify the Test To Unverify.');
         return false;
       } else {
-        if (row.IsResultEntryDone) {
-          row.IsVerificationDone = newBoolVerifyStatus;
+        if (RowsData.IsResultEntryDone) {
+          RowsData.IsVerificationDone = newBoolVerifyStatus;
+     
         }
       }
-      if (row != null) {
+      if (RowsData != null) {
         try {
-          const response = await customAxios.post(urlSaveVerification, row, {
+          const response = await customAxios.post(urlSaveVerification, RowsData[0], {
             headers: {
               'Content-Type': 'application/json'
             }

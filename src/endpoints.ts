@@ -61,6 +61,7 @@ export const urlAddUser=`${baseURL}/api/User/AddUser`;
 export const urlDeleteAppUser=`${baseURL}/api/User/DeleteAppUser`; 
 export const urlGetGetAppUserbyId=`${baseURL}/api/User/GetAppUserbyId`; 
 export const urlGetAutocompleteProviders=`${baseURL}/api/User/AutoCompleteProviderNames`; 
+export const urlGetAllMenusBasedOnRoleId=`${baseURL}/api/User/GetAllMenusBasedOnRoleId`; 
 
 
 
