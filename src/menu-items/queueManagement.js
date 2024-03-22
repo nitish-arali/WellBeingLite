@@ -1,4 +1,3 @@
-// assets
 import { IconUserPlus, IconUsers } from '@tabler/icons';
 
 // constant
@@ -8,14 +7,14 @@ const icons = { IconUserPlus, IconUsers };
 
 const patient = {
   id: 'dashboard',
-  title: 'Patient',
+  title: 'Queue ManageMent',
   type: 'group',
   children: [
     {
-      id: 'patient',
-      title: 'Patient',
+      id: 'queueManagement',
+      title: 'Queue Management',
       type: 'item',
-      url: '/patient',
+      url: '/queuemanagement',
       icon: icons.IconUsers,
       breadcrumbs: false
     }

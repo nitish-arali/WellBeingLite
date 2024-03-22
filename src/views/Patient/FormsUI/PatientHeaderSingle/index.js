@@ -9,8 +9,6 @@ import InfoTwoToneIcon from '@mui/icons-material/InfoTwoTone';
 import RequestQuoteTwoToneIcon from '@mui/icons-material/RequestQuoteTwoTone';
 import Chip from '@mui/material/Chip'; // Import Chip component
 function PatientHeaderSingle({ patientdata, encounterId }) {
-  
-  
   function showGenderPic(patientdata) {
     if (patientdata?.Gender === 7) {
       return male;
@@ -41,8 +39,6 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
 
   const formattedDate = formatDate(patientdata?.DateOfBirth);
   const dateOfBirth = formattedDate === 'Invalid Date' ? 'N/A' : formattedDate;
-
-
 
   function calculateAge(dateString) {
     const parts = dateString.split('/');
@@ -76,7 +72,6 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
   const encounterId1 = encounterId; // Extract encounterId from patientdata
   const en3 = patientdata?.GeneratedEncounterId;
 
-
   const patientContent = (
     <Grid container spacing={2} alignItems="center">
       <Grid item xs={1}>
@@ -90,12 +85,10 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
           <span style={{ fontWeight: '700' }}>VisitId:</span>
           {en3 ? (
             <Chip label={en3} size="small" color="secondary" />
+          ) : encounterId1 ? (
+            <Chip label={encounterId1} size="small" color="secondary" />
           ) : (
-            encounterId1 ? (
-              <Chip label={encounterId1} size="small" color="secondary" />
-            ) : (
-              <span style={{ color: 'red' }}>N/A</span>
-            )
+            <span style={{ color: 'red' }}>N/A</span>
           )}
         </Typography>
       </Grid>
@@ -134,7 +127,6 @@ function PatientHeaderSingle({ patientdata, encounterId }) {
       </Grid>
     </Grid>
   );
-
 
   return (
     <Box

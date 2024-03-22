@@ -4,8 +4,10 @@ import utilities from './utilities';
 import other from './other';
 import patient from './patient';
 import laboratory from './laboratory';
-import billing from './billing'; 
+import billing from './billing';
 import master from './master';
+import queueManagement from './queueManagement';
+import purchaseOrder from './purchaseOrder';
 //import templatemaster from './templatemaster';
 
 // ==============================|| MENU ITEMS ||============================== //
@@ -116,7 +118,7 @@ const leftMenuitems = {
               breadcrumbs: false
             },
             {
-              id: 46,
+              id: 49,
               title: 'ContainerDefinitions',
               type: 'item',
               icon: null,
@@ -155,6 +157,16 @@ const leftMenuitems = {
           icon: null,
           children: [],
           url: '',
+          target: false,
+          breadcrumbs: false
+        },
+        {
+          id: 50,
+          title: 'Queue Management',
+          type: 'item',
+          icon: null,
+          children: [],
+          url: '/QueueManagement',
           target: false,
           breadcrumbs: false
         }
@@ -216,7 +228,18 @@ const leftMenuitems = {
       title: 'Inventory Management',
       type: 'collapse',
       icon: null,
-      children: [],
+      children: [
+        {
+          id: 51,
+          title: 'Purchase Order',
+          type: 'item',
+          icon: null,
+          children: [],
+          url: '/purchaseOrder',
+          target: false,
+          breadcrumbs: false
+        }
+      ],
       url: '',
       target: false,
       breadcrumbs: false
@@ -276,8 +299,7 @@ const leftMenuitems = {
           url: '/ResultentrySearch',
           target: false,
           breadcrumbs: false
-        },
-    
+        }
       ],
       url: '',
       target: false,
@@ -297,7 +319,7 @@ const leftMenuitems = {
 };
 
 const menuItems = {
-  items: [dashboard, leftMenuitems, patient, master, laboratory, billing, pages, utilities, other]
+  items: [dashboard, leftMenuitems, patient, master, laboratory, billing, purchaseOrder, queueManagement, pages, utilities, other]
 };
 
 export default menuItems;

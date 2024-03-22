@@ -1,88 +1,84 @@
-import CustomAutocomplete from 'views/Patient/FormsUI/Autocomplete';
 import { urlSearchUHID, urlGetAllVisitsForPatientId } from 'endpoints.ts';
-import { Grid, Typography, Select, MenuItem } from '@mui/material';
-import Button from 'views/Patient/FormsUI/Button';
-import { makeStyles } from '@mui/styles';
-import Box from '@mui/material/Box';
-import { Container } from '@mui/system';
-import TextField1 from 'views/Patient/FormsUI/Textfield/index.js';
-import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
 import customAxios from 'views/Patient/FormsUI/CustomAxios';
 import React, { useEffect, useState } from 'react';
 import VisitSelect from 'views/Patient/FormsUI/VisitSelect/index.js';
 import { useNavigate } from 'react-router';
-import { ErrorMessage } from 'formik';
-
-const useStyles = makeStyles((theme) => ({
-  formWrapper: {
-    marginTop: theme.spacing(5),
-    marginBottom: theme.spacing(8)
-  }
-}));
+import { Form, Row, Col, AutoComplete, Input, Select, Button, Layout } from 'antd';
+import Title from 'antd/es/typography/Title';
+import { Table, Tabs } from 'antd';
 
 function Billing() {
+  const [form] = Form.useForm();
+
+  let [selectedOption, setSelectedOption] = useState(null);
+
+  const navigate = useNavigate();
+  const { TabPane } = Tabs;
+
+  // Define your state variables
   const [selectedUhId, setSelectedUhId] = useState(null);
-  const [inputValue, setInputValue] = useState('');
   const [options, setOptions] = useState([]);
   const [visits, setVisits] = useState([]);
-  const navigate = useNavigate();
-  const [editorContent, setEditorContent] = useState('');
   const [initialFormState, setInitialFormState] = useState({
     PatientName: '',
-    Uhid: '',
     visit: ''
   });
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
-  const validationSchema = Yup.object({
-    Uhid: Yup.object().nullable().required('UHID is required')
-  });
+  // Define your functions
+  const handleAutocompleteChange = async (newValue) => {
+    debugger;
+    // let selectedOption = null;
 
-  const initialValues = {
-    Uhid: ''
-    // Add other fields as needed
-  };
-
-  const classes = useStyles();
-  const handleInputChange = (newInputValue) => {
-    setInputValue(newInputValue);
-  };
-
-  const handleAutocompleteChange = (newValue) => {
-    // Initialize selectedOption to null if newValue is null
-    let selectedOption = null;
-
-    // Update selectedOption only if newValue is not null
     if (newValue !== null) {
-      selectedOption = options.find((option) => option.UhId === newValue.UhId);
+      selectedOption = options.find((option) => option.UhId === newValue);
+      setSelectedPatient(selectedOption);
     }
-
-    // Update both selectedUhId and PatientName in the state
     setSelectedUhId(newValue);
-    console.log('uhid', selectedUhId);
-    setInitialFormState((prevState) => ({
-      ...prevState,
-      PatientName: newValue ? (selectedOption ? selectedOption.PatientFirstName : '') : '' // Set PatientName to the value from the selected option if newValue is not null
-    }));
-    if (selectedOption && selectedOption.PatientId) {
-      // debugger;
 
+    if (selectedOption && selectedOption.PatientId) {
       getencounters(selectedOption.PatientId);
-      //setSelectedPatientId(selectedOption.PatientId);
+
+      // const firstEncounter = visits.length > 0 ? visits[0] : null;
+
+      form.setFieldsValue({
+        PatientName: selectedOption.PatientFirstName
+        // EncounterID: firstEncounter ? firstEncounter.EncounterId : ''
+      });
     } else {
       setVisits([]);
-      //  setSelectedPatientId(null);
       setInitialFormState({
         PatientName: '',
         visit: ''
       });
     }
   };
+
+  const handleSelect = (value, option) => {
+    debugger;
+    // Update the selectedUhId state
+    setSelectedUhId(value);
+
+    // Fetch encounter ID
+    // getencounters(option.key);
+
+    // const firstEncounter = visits.length > 0 ? visits[0] : null;
+    // form.setFieldsValue({
+    //   EncounterID: firstEncounter ? firstEncounter.EncounterId : ''
+    // });
+  };
+
   const getencounters = async (patientid) => {
+    debugger;
     try {
       const visitsResponse = await customAxios.get(`${urlGetAllVisitsForPatientId}?PatientId=${patientid}`);
       if (visitsResponse.data && Array.isArray(visitsResponse.data.data.EncounterModellist)) {
         setVisits(visitsResponse.data.data.EncounterModellist);
+        const firstEncounter =
+          visitsResponse.data.data.EncounterModellist.length > 0 ? visitsResponse.data.data.EncounterModellist[0] : null;
+        form.setFieldsValue({
+          Encounter: firstEncounter ? firstEncounter.EncounterId : ''
+        });
       } else {
         setVisits([]);
       }
@@ -91,29 +87,36 @@ function Billing() {
       setVisits([]);
     }
   };
-  const handleSubmit = (values) => {
-    // debugger;
+
+  const handleOnSubmit = (values) => {
+    debugger;
     console.log('Form submitted with values:', values);
-    const uhid = selectedUhId ? selectedUhId.UhId : '';
-    const patientId = selectedUhId ? selectedUhId.PatientId : '';
-    const PatientName = selectedUhId ? selectedUhId.PatientFirstName : '';
-    const encounterId = values.visit;
-    // Include the CKEditor content in the form submission
-    console.log('Editor Data:', editorData);
-    //  navigate(`/Master/${patientId}/${encounterId}`);
-    // Construct the URL with query parameters
-    const url = `/Master/${patientId}/${encounterId}`;
+    const uhid = selectedPatient ? selectedPatient.UhId : '';
+    const patientId = selectedPatient ? selectedPatient.PatientId : '';
+    const PatientName = selectedPatient ? selectedPatient.PatientFirstName : '';
+    const encounterId = values.Encounter;
+
+    const url = `/billing/Create`;
     console.log(url);
-    // Navigate to the new URL
-    navigate(url);
+    // navigate(url);
+    navigate(url, {
+      state: {
+        patientId: patientId,
+        encounterId: encounterId
+      }
+    });
+  };
+
+  const handleReset = () => {
+    form.resetFields();
   };
 
   const fetchOptionsCallback = async (inputValue) => {
+    debugger;
     try {
       const response = await customAxios.get(`${urlSearchUHID}?Uhid=${inputValue}`);
       if (response.data && Array.isArray(response.data.data)) {
         setOptions(response.data.data);
-        // Update the state with the received data for PatientName
       } else {
         setOptions([]);
       }
@@ -123,69 +126,107 @@ function Billing() {
     }
   };
 
-  const [editorData, setEditorData] = useState('');
-
-  const handleEditorChange = (data) => {
-    setEditorData(data);
-  };
-
-  const getOptionLabel = (option) => option.UhId;
-
-  const isOptionEqualToValue = (option, value) => option.UhId === value.UhId;
-
   return (
-    <Box sx={{ width: '100%', backgroundColor: 'white', padding: '0' }}>
-      <Grid container width={'100%'}>
-        <Grid item xs={12}>
-          <Container maxWidth="xlg">
-            <div className={classes.formWrapper}>
-              <Formik initialValues={{ ...initialFormState }} validationSchema={validationSchema} onSubmit={handleSubmit}>
-                <Form>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Typography variant="h3">Billing</Typography>
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <CustomAutocomplete
-                        id="uhid-autocomplete"
-                        label="UHID"
-                        name="Uhid"
-                        options={options}
-                        value={selectedUhId}
-                        onInputChange={handleInputChange}
-                        onChange={handleAutocompleteChange}
-                        fetchOptionsCallback={fetchOptionsCallback}
-                        getOptionLabel={getOptionLabel}
-                        isOptionEqualToValue={isOptionEqualToValue}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField1 name="PatientName" label="Name" value={initialFormState.PatientName} />
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <VisitSelect
-                        name="visit"
-                        style={{ width: '100%' }}
-                        options={visits}
-                        label="Visits"
-                        getOptionLabel={(option) => option.GeneratedEncounterId}
-                        getOptionValue={(option) => option.EncounterId}
-                      />
-                    </Grid>
-                    <Grid item xs={10}></Grid>
-                    <Grid item xs={2} textAlign={'end'}>
-                      <Button type="submit" style={{ width: '100%' }}>
-                        Submit
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </Form>
-              </Formik>
-            </div>
-          </Container>
-        </Grid>
-      </Grid>
-    </Box>
+    <Layout style={{ zIndex: '999999999' }}>
+      <div style={{ width: '100%', backgroundColor: 'white', minHeight: 'max-content', borderRadius: '10px' }}>
+        <Row style={{ padding: '0.5rem 2rem 0.5rem 2rem', backgroundColor: '#40A2E3', borderRadius: '10px 10px 0px 0px ' }}>
+          <Col span={16}>
+            <Title level={4} style={{ color: 'white', fontWeight: 500, margin: 0, paddingTop: 0 }}>
+              Billing Management System
+            </Title>
+          </Col>
+        </Row>
+        <Form
+          layout="vertical"
+          onFinish={handleOnSubmit}
+          variant="outlined"
+          size="large"
+          /* style={{
+            maxWidth: 1500
+          }} */
+          form={form}
+        >
+          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+            <Col className="gutter-row" span={6} offset={1} style={{ marginLeft: '30px' }}>
+              <Form.Item
+                label="UHID"
+                name="Uhid"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please add Last Name'
+                  }
+                ]}
+              >
+                <AutoComplete
+                  id="uhid-autocomplete"
+                  options={options.map((option) => ({ value: option.UhId, key: option.PatientId }))}
+                  onSearch={fetchOptionsCallback} // Call fetchOptionsCallback when the user searches
+                  onChange={handleAutocompleteChange} // Call handleAutocompleteChange when the input field changes
+                  onSelect={handleSelect}
+                  value={selectedUhId}
+                  filterOption={(inputValue, option) => option.value.toUpperCase().includes(inputValue.toUpperCase())}
+                  allowClear
+                />
+              </Form.Item>
+            </Col>
+
+            <Col className="gutter-row" span={6}>
+              <Form.Item
+                label="PatientName"
+                name="PatientName"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please add Last Name'
+                  }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+
+            <Col className="gutter-row" span={6}>
+              <Form.Item
+                label="EncounterID"
+                name="Encounter"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please add Last Name'
+                  }
+                ]}
+              >
+                <Select value={initialFormState.visit} disabled>
+                  {visits.map((option) => (
+                    <Select.Option key={option.EncounterId} value={option.EncounterId}>
+                      {option.GeneratedEncounterId}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row justify="end">
+            <Col style={{ marginRight: '10px' }}>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
+            </Col>
+            <Col>
+              <Form.Item>
+                <Button type="primary" onClick={handleReset}>
+                  Clear
+                </Button>
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </div>
+    </Layout>
   );
 }
 

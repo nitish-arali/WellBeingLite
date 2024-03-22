@@ -1,51 +1,43 @@
-import customAxios from './FormsUI/CustomAxios';
-import React, { useEffect, useState } from 'react';
-import { ScaleLoader } from 'react-spinners';
-import { TableContainer, Paper, Grid, Typography, IconButton } from '@mui/material';
-import MuiButton from '@mui/material/Button';
-import { makeStyles } from '@mui/styles';
-import PersonAdd from '@mui/icons-material/PersonAddAlt1Rounded';
-import PersonVisit from '@mui/icons-material/HowToRegRounded';
-import Box from '@mui/material/Box';
-import calendarIcon from '../../assets/images/icons/calendar_icon.png';
-import { urlGetAllPatients, urlGetPatientDetail } from '../../endpoints.ts';
-import InputAdornment from '@mui/material/InputAdornment';
-import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
-import { Container } from '@mui/system';
-import TextField from './FormsUI/Textfield';
-import Select from './FormsUI/Select';
-import DateTimePicker from './FormsUI/DateTimePicker/index.js';
-import Button from './FormsUI/Button/index.js';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import CustomSelect from './FormsUI/CustomSelect';
-import { useRef } from 'react';
-import Dialog from '@mui/material/Dialog';
-import Pagination from '@mui/material/Pagination';
-import MaterialUIPagination from './FormsUI/MaterialUIPagination/index.js';
-import Stack from '@mui/material/Stack';
-import PaginationInfo from './FormsUI/PaginationInfo/index.js';
-import CloseIcon from '@mui/icons-material/Cancel';
-import useLoader from '../../hooks/useLoader';
-import CustomAutocomplete from './FormsUI/Autocomplete/index.js';
-import PatientHeader from './FormsUI/PatientHeader/index.js';
-import PatientHeaderVisit from './FormsUI/PatientHeaderVisit/indexvisit.js';
-import CustomLoader from './FormsUI/CustomLoader/index';
+import customAxios from 'views/Patient/FormsUI/CustomAxios';
+import React, { useRef, useEffect, useState } from 'react';
+import { LeftOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
-const useStyles = makeStyles((theme) => ({
-  formWrapper: {
-    marginTop: theme.spacing(5),
-    marginBottom: theme.spacing(8)
-  }
-}));
+import { Col, ConfigProvider, Row, Select, Typography, DatePicker, Spin, AutoComplete, notification } from 'antd';
+const { Option } = Select;
+import Input from 'antd/es/input';
+import Form from 'antd/es/form';
+import { Card, Modal, Table, message, Layout, Tag, Avatar } from 'antd';
 
-export default function Patient() {
+import Button from 'antd/es/button';
+import { urlGetAllPatients, urlGetPatientDetail, urlAddNewVisit, urlCancelVisit } from 'endpoints.ts';
+import { padding } from '@mui/system';
+import { SearchOutlined, CalendarFilled, UserAddOutlined, WomanOutlined } from '@ant-design/icons';
+import 'css/PatientHeader.css';
+import male from 'assets/images/m.png';
+import female from 'assets/images/f.png';
+import defaultPic from 'assets/images/defaultPic.png';
+
+const Patient = () => {
   const [patientDetails, setPatientDetails] = useState([]);
-  const [patientsearchDetails, setPatientSearchDetails] = useState([]);
-
-  const [encounterId] = useState(null);
+  const { Title } = Typography;
+  const [isloading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [form1] = Form.useForm();
+  const [form] = Form.useForm();
+  const [selectedRecord, setSelectedRecord] = useState([]); // New state variable to store selected record
+  const [isEditVisitModalVisible, setIsEditVisitModalVisible] = useState(false);
+  const [isCancelVisitModalVisible, setIsCancelVisitModalVisible] = useState(false);
+  // const [contextHolder] = message.useMessage();
+  const [IsVisitCreated, setIsVisitCreated] = useState(false);
+
+  const [patientTypeValue, setpatientTypeSelectValue] = useState(null);
+
+  const [departments, setDepartments] = useState([]);
+  const [providers, setProviders] = useState([]);
+  const [serviceLocations, setServiceLocations] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [patientDropdown, setPatientDropdown] = useState({
     Title: [],
@@ -56,13 +48,19 @@ export default function Patient() {
     Statesnew: [],
     PatientType: [],
     KinTitle: [],
-    VisitType: []
+    VisitType: [],
+    EncounterType: [],
+    EncounterReason: [],
+    ReferredBy: [],
+    EncounterEditReason: [],
+    EncounterCancelReason: []
   });
 
-  const { loaderLoading, startLoading, stopLoading } = useLoader();
   useEffect(() => {
+    debugger;
     customAxios.get(urlGetAllPatients).then((response) => {
       setPatientDetails(response.data.data.Patients);
+      setLoading(false);
     });
   }, []);
 
@@ -70,16 +68,58 @@ export default function Patient() {
     customAxios.get(urlGetPatientDetail).then((response) => {
       const apiData = response.data.data;
       setPatientDropdown(apiData);
+      setLoading(false);
     });
   }, []);
 
-  const [selectedUhId, setSelectedUhId] = useState(null);
-
-  const loadPatients = () => {
-    customAxios.get(urlGetAllPatients).then((response) => {
-      setPatientDetails(response.data.data.Patients);
+  useEffect(() => {
+    form1.setFieldsValue({
+      PatientType: selectedRecord.PatientTypeName,
+      Provider: selectedRecord.ProviderName,
+      Department: selectedRecord.DepartmentName,
+      ServiceLocation: selectedRecord.ServiceLocationName,
+      EncounterType: selectedRecord.EncounterTypeId,
+      KinTitle: selectedRecord.KinTitle,
+      KinName: selectedRecord.KinName,
+      EncounterReason: selectedRecord.EncounterReasonId,
+      KinAddress: selectedRecord.KinAddress,
+      KinContactNo: selectedRecord.KinContactNo,
+      referredBy: selectedRecord.ReferredBy
     });
+  }, [selectedRecord]);
+
+  useEffect(() => {
+    form.setFieldsValue({
+      PatientType: selectedRecord.PatientTypeName,
+      Provider: selectedRecord.ProviderName,
+      Department: selectedRecord.DepartmentName,
+      ServiceLocation: selectedRecord.ServiceLocationName,
+      EncounterType: selectedRecord.EncounterTypeId,
+      KinTitle: selectedRecord.KinTitle,
+      KinName: selectedRecord.KinName,
+      EncounterReason: selectedRecord.EncounterReasonId,
+      KinAddress: selectedRecord.KinAddress,
+      KinContactNo: selectedRecord.KinContactNo,
+      referredBy: selectedRecord.ReferredBy
+    });
+  }, [selectedRecord]);
+
+  const formatDatefortable = (dateString) => {
+    if (!dateString) return '""';
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
   };
+
+  function showGenderPic(Gender) {
+    if (Gender === 7) {
+      return male;
+    }
+    if (Gender === 8) {
+      return female;
+    } else {
+      return defaultPic;
+    }
+  }
 
   const navigateToNewPatient = () => {
     const url = `/NewPatient`;
@@ -93,190 +133,750 @@ export default function Patient() {
     navigate(url);
   };
 
-  const [currentPage1, setCurrentPage1] = useState(1);
-  const [patientsPerPage1] = useState(10); // Number of patients per page
+  const handleeditvisitmodal = (record) => {
+    debugger;
+    setSelectedRecord(record); // Set the selected record when the modal is opened
+    console.log('see the values of reocrd', record);
 
-  const indexOfLastPatient = currentPage1 * patientsPerPage1;
-  const indexOfFirstPatient = indexOfLastPatient - patientsPerPage1;
-  const currentPatients = patientsearchDetails.slice(indexOfFirstPatient, indexOfLastPatient);
-
-  // Calculate the range information
-  let startRange = 1;
-  let endRange = patientsearchDetails.length;
-
-  if (patientsearchDetails.length > 0) {
-    startRange = indexOfFirstPatient + 1;
-    endRange = Math.min(indexOfLastPatient, patientsearchDetails.length);
-  }
-  // Change page
-  const onPageChange = (pageNumber) => {
-    setCurrentPage1(pageNumber);
+    setIsEditVisitModalVisible(true);
   };
 
-  //pagination and x-y of z and totalcountof patient
-  const [currentPage, setCurrentPage] = useState(1);
-  const [patientsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-    setCurrentPage(1);
+  const handleEditVisitModalCancel = () => {
+    debugger;
+    setIsEditVisitModalVisible(false);
   };
 
-  // Function to filter patients by name
-  const filteredPatients = patientDetails.filter((patient) => patient.PatientFirstName.toLowerCase().includes(searchTerm.toLowerCase()));
-  const totalPatients = filteredPatients.length;
-  const firstPatientIndex = (currentPage - 1) * patientsPerPage + 1;
-  const lastPatientIndex = Math.min(currentPage * patientsPerPage, totalPatients);
-  // Function to change the current page
-  const handleChangePage = (event, newPage) => {
-    setCurrentPage(newPage);
-  };
-  const totalPatientCountStyle = {
-    textAlign: 'center', // Center the text
-    marginTop: '10px',
-    paddingLeft: '10px', // Adjust the margin as needed
-    paddingRight: '10px' // Adjust the margin as needed
-  };
-  const searchInputStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end'
-    // marginBottom: '5px',
+  const handlecancelvisitmodal = (record) => {
+    debugger;
+    setSelectedRecord(record); // Set the selected record when the modal is opened
+    console.log('see the values of reocrd', record);
+
+    setIsCancelVisitModalVisible(true);
   };
 
-  const classes = useStyles();
+  const handleCancelVisitModalCancel = () => {
+    debugger;
+    setIsCancelVisitModalVisible(false);
+  };
+
+  const handleOk = async () => {
+    debugger;
+    try {
+      await form.validateFields(); // Trigger form validation
+      const values = form.getFieldsValue();
+      console.log('Selected submitting values', values);
+
+      const Encounter = {
+        PatientId: selectedRecord.PatientId,
+        PatientType: selectedRecord.PatientType,
+        FacilityDepartmentId: selectedRecord.FacilityDepartmentId,
+        FacilityDepartmentServiceLocationId: selectedRecord.FacilityDepartmentServiceLocationId,
+        ProviderId: selectedRecord.ProviderId,
+        EncounterId: selectedRecord.EncounterId,
+        Encounter: selectedRecord.GeneratedEncounterId ? selectedRecord.GeneratedEncounterId : 0,
+        EncounterTypeId: values.EncounterType,
+        EncounterReasonId: values.EncounterReason,
+        KinTitle: values.KinTitle,
+        KinName: values.KinName,
+        KinAddress: values.KinAddress,
+        KinContactNo: values.KinContactNo,
+        ReferredBy: values.referredBy,
+        AttendingProviderId: values.admittedUnder,
+        EncounterEditReason: values.EditReason,
+        EncounterDate: selectedRecord.CreatedDateTime
+      };
+
+      try {
+        // Send a POST request to the server
+        const response = await customAxios.post(urlAddNewVisit, Encounter, {
+          headers: {
+            'Content-Type': 'application/json' // Replace with the appropriate content type if needed
+            // Add any other required headers here
+          }
+        });
+
+        notification.success({
+          message: 'Visit details updated Successful'
+        });
+        // Check if the request was successful
+        if (response.status !== 200) {
+          throw new Error(`Server responded with status code ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Failed to send data to server: ', error);
+        notification.error({
+          message: 'Visit edit details UnSuccessful',
+          description: 'Failed to cancel visit. Please try again later.'
+        });
+      }
+
+      form.resetFields();
+      setIsEditVisitModalVisible(false);
+    } catch (error) {
+      // Handle errors if needed
+    }
+  };
+
+  const handleOkCancel = async () => {
+    debugger;
+    try {
+      await form1.validateFields(); // Trigger form validation
+      const values = form1.getFieldsValue();
+      console.log('Selected submitting values', values);
+
+      const Encounter = {
+        PatientId: selectedRecord.PatientId,
+        PatientType: selectedRecord.PatientType,
+        FacilityDepartmentId: selectedRecord.FacilityDepartmentId,
+        FacilityDepartmentServiceLocationId: selectedRecord.FacilityDepartmentServiceLocationId,
+        ProviderId: selectedRecord.ProviderId,
+        EncounterId: selectedRecord.EncounterId,
+        Encounter: selectedRecord.GeneratedEncounterId ? selectedRecord.GeneratedEncounterId : 0,
+        EncounterTypeId: values.EncounterType,
+        EncounterReasonId: values.EncounterReason,
+        KinTitle: values.KinTitle,
+        KinName: values.KinName,
+        KinAddress: values.KinAddress,
+        KinContactNo: values.KinContactNo,
+        ReferredBy: values.referredBy,
+        AttendingProviderId: values.admittedUnder,
+        EncounterCancelReason: values.CancelEdit,
+        EncounterDate: selectedRecord.CreatedDateTime
+      };
+
+      try {
+        // Send a POST request to the server
+        const response = await customAxios.post(urlCancelVisit, Encounter, {
+          headers: {
+            'Content-Type': 'application/json' // Replace with the appropriate content type if needed
+            // Add any other required headers here
+          }
+        });
+
+        notification.success({
+          message: 'Visit cancellation Successful'
+        });
+        // Check if the request was successful
+        if (response.status !== 200) {
+          throw new Error(`Server responded with status code ${response.status}`);
+        }
+
+        setPatientDetails((prevPatients) =>
+          prevPatients.filter((patient) => patient.GeneratedEncounterId !== selectedRecord.GeneratedEncounterId)
+        );
+      } catch (error) {
+        console.error('Failed to send data to server: ', error);
+        notification.error({
+          message: 'Visit cancellation UnSuccessful',
+          description: 'Failed to cancel visit. Please try again later.'
+        });
+      }
+
+      form1.resetFields();
+      setIsCancelVisitModalVisible(false);
+    } catch (error) {
+      // Handle errors if needed
+    }
+  };
+
+  const columns = [
+    {
+      title: 'Sl No',
+      key: 'index',
+
+      render: (text, record, index) => {
+        const serialNumber = (currentPage - 1) * itemsPerPage + index + 1;
+        return serialNumber;
+      }
+    },
+    {
+      title: 'UH ID',
+      dataIndex: 'UhId',
+      key: 'UhId',
+      // sorter: (a, b) => a.UhId - b.UhId,
+      // sortDirections: ['descend', 'ascend'],
+      render: (text, record) => (
+        <Tag color="blue" style={{ fontWeight: 'bold', borderWidth: '5px', fontSize: '15px' }}>
+          {record.UhId}
+        </Tag>
+      )
+    },
+    {
+      title: 'Encounter ID',
+      dataIndex: 'VisitId',
+      key: 'VisitId',
+
+      // sortDirections: ['descend', 'ascend'],
+      render: (text, record) => {
+        const tag = record.PatientTypeName;
+        let color = '';
+        if (tag === 'Emergency') {
+          color = 'red';
+        } else if (tag === 'Day Care') {
+          color = 'magenta';
+        } else if (tag === 'Ambulatory Patient') {
+          color = 'orange';
+        } else {
+          color = 'lime';
+        }
+        return (
+          <Tag color={color} style={{ fontWeight: 'bold', fontSize: '15px' }}>
+            {record.GeneratedEncounterId}
+          </Tag>
+        );
+      }
+    },
+    {
+      title: 'Avatar',
+      dataIndex: 'Avatar',
+      key: 'Avatar',
+      render: (text, record) => <Avatar src={showGenderPic(record.Gender)} size="large" />
+    },
+    {
+      title: 'Patient Details',
+      dataIndex: 'PatientName',
+      key: 'PatientName',
+
+      render: (text, record) => (
+        <div>
+          <p>
+            <strong>Name:</strong> {record.PatientFirstName}
+            <br />
+            <strong>Mob No:</strong> {record.MobileNumber}
+            <br />
+            <strong>Dob:</strong> {formatDatefortable(record.DateOfBirth)}
+          </p>
+        </div>
+      )
+    },
+    {
+      title: 'Visit Details',
+      dataIndex: 'PatientName',
+      key: 'PatientName',
+      // sorter: (a, b) => a.PatientName.localeCompare(b.PatientName),
+      // sortDirections: ['descend', 'ascend'],
+      render: (text, record) => (
+        <div>
+          <p>
+            <strong>Patient Type:</strong> {record.PatientTypeName}
+            <br />
+            <strong>Department:</strong> {record.DepartmentName}
+            <br />
+            <strong>Provider Name:</strong> {record.ProviderName}
+            <br />
+            <strong>Service Location:</strong> {record.ServiceLocationName}
+          </p>
+        </div>
+      )
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      width: 200,
+      render: (text, record) => (
+        <>
+          <div>
+            <p>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlecancelvisitmodal(record);
+                }}
+              >
+                Cancel Visit
+              </a>
+            </p>
+          </div>
+          <div>
+            <p>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleeditvisitmodal(record);
+                }}
+              >
+                Edit Visit Details
+              </a>
+            </p>
+          </div>
+          <div>
+            <p>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                More Details
+              </a>
+            </p>
+          </div>
+        </>
+      )
+    }
+  ];
+
   return (
     <>
-      <Box sx={{ width: '100%', typography: 'body1' }}>
-        <TableContainer component={Paper}>
-          <div style={{ width: '100%' }}>
-            <div>
-              <Box
-                width={'100%'}
-                height={'80px'}
-                // border={2}
-                // borderColor="#efebe9"
-                backgroundColor="#d1c4e9"
-                // borderRadius={4}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-evenly"
-                p={2}
-                mb={2}
+      {isloading ? (
+        // Skeleton Loading for Header
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+          <Spin tip="Loading" size="large">
+            <div className="content" />
+          </Spin>
+        </div>
+      ) : (
+        <>
+          <Layout style={{ zIndex: '999999999' }}>
+            <div style={{ backgroundColor: 'white', minHeight: '100vh', borderRadius: '10px', overflow: 'hidden', padding: '1rem' }}>
+              <Row
+                style={{
+                  // padding: '0rem 0rem 0rem 0rem',
+                  backgroundColor: '#d1c4e9',
+                  borderRadius: '10px 10px 10px 10px',
+                  height: '70px',
+                  marginLeft: '5px',
+                  marginRight: ' 5px',
+                  alignItems: 'center'
+                }}
+                gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
               >
-                <Grid container width={'100%'} justifyContent="space-between" alignItems="center">
-                  <Grid item xs={3}>
-                    <MuiButton variant="contained" startIcon={<PersonAdd />} onClick={navigateToNewPatient}>
-                      Add Patient
-                    </MuiButton>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Box display="flex" justifyContent="center" alignItems="center" marginBottom="5px">
-                      <Grid container justifyContent="center" alignItems="center">
-                        <img src={calendarIcon} alt="Patient count" height="40px" />
-                        <div
-                          style={{
-                            height: '30px',
-                            width: '30px',
-                            color: 'black',
-                            backgroundColor: '#fff',
-                            padding: '5px',
-                            fontSize: '15px',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderRadius: '10px',
-                            fontWeight: 'bolder'
-                          }}
-                        >
-                          {filteredPatients.length}
-                        </div>
-
-                        <Grid item xs={12} display="flex" justifyContent="center">
-                          <Typography variant="p">Visits for Today</Typography>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={2}></Grid>
-                  <Grid item xs={1}>
-                    <MuiButton variant="contained" startIcon={<PersonVisit />} onClick={navigateToNewVisit}>
-                      Visit
-                    </MuiButton>
-                  </Grid>
-                </Grid>
-              </Box>
-              <Grid container width={'100%'} paddingBottom="20px">
-                <Grid item xs={4}>
-                  <Typography variant="h3" sx={{ paddingLeft: '20px' }}>
-                    List of Patients in Visit
-                  </Typography>
-                  <div style={totalPatientCountStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '10px' }}>
-                      Showing {firstPatientIndex}-{lastPatientIndex} of {totalPatients} Patients
+                <Col span={1}>
+                  <Button type="primary" size="large" onClick={navigateToNewPatient}>
+                    <UserAddOutlined style={{ fontWeight: 'bold', fontSize: '18px' }} />
+                    <strong> Add Patient </strong>
+                  </Button>
+                </Col>
+                <Col span={3} offset={10}>
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <CalendarFilled style={{ fontSize: '30px', color: '#1a9bf0' }} />
+                    <div
+                      style={{
+                        height: '30px',
+                        width: '30px',
+                        color: 'black',
+                        backgroundColor: '#fff',
+                        padding: '5px',
+                        fontSize: '15px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        borderRadius: '10px',
+                        fontWeight: 'bolder',
+                        marginLeft: '5px' // Added margin to create space between icon and text
+                      }}
+                    >
+                      {patientDetails.length}
                     </div>
-                  </div>
-                </Grid>
-
-                <Grid item xs={5}></Grid>
-
-                <Grid item xs={3}>
-                  <div style={searchInputStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <input
-                        type="text"
-                        placeholder="Search by patient name..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        style={{
-                          marginRight: '10px',
-                          borderRadius: '5px', // Add border radius
-                          padding: '10px 5px', // Add padding
-                          border: '3px solid #ccc' // Add border for styling
-                        }}
-                      />
-                    </div>
-                  </div>
-                </Grid>
-              </Grid>
-              <div style={{ paddingLeft: '20px', paddingRight: '20px' }}>
-                {loaderLoading ? (
-                  <CustomLoader loading={loaderLoading} color="#007bff" size={15} />
-                ) : (
-                  <>
-                    {filteredPatients.slice((currentPage - 1) * patientsPerPage, currentPage * patientsPerPage).map((patient, index) => (
-                      <PatientHeader key={index} patientdata={patient} encounterId={encounterId} />
-                    ))}
-                  </>
-                )}
-                {/* Pagination */}
-                <Stack direction="row" spacing={2} justifyContent="end">
-                  <Pagination
-                    count={Math.ceil(filteredPatients.length / patientsPerPage)}
-                    page={currentPage}
-                    onChange={handleChangePage}
-                    color="primary"
+                  </span>
+                  <strong style={{ marginLeft: '5px' }}>Visits for Today</strong>
+                </Col>
+                <Col span={1} offset={7}>
+                  <Button type="primary" size="large" onClick={navigateToNewVisit}>
+                    {' '}
+                    <strong>Add Visit</strong>
+                  </Button>
+                </Col>
+              </Row>
+              <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                <Col span={24}>
+                  <Title level={4}> List of Patients in Visits</Title>
+                  <Title level={5}>showing 1 of 1 Patients</Title>
+                </Col>
+              </Row>
+              <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                <Col span={24}>
+                  <Table
+                    dataSource={patientDetails}
+                    columns={columns}
+                    rowKey={(row) => row.EncounterId}
+                    size="small"
+                    className="custom-table"
+                    scroll={{ x: 1000 }}
+                    onChange={(pagination) => {
+                      setCurrentPage(pagination.current);
+                      setItemsPerPage(pagination.pageSize);
+                    }}
+                    bordered
                   />
-                </Stack>
-              </div>
+                </Col>
+              </Row>
             </div>
-          </div>
-        </TableContainer>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-        {/* Same as */}
-        <ToastContainer />
-      </Box>
+          </Layout>
+          <ConfigProvider
+            theme={{
+              token: {
+                zIndexPopupBase: 3000
+              }
+            }}
+          >
+            {/* {contextHolder} */}
+            <Modal
+              width={1000}
+              title="VisitModel"
+              open={isEditVisitModalVisible}
+              onOk={handleOk}
+              // okButtonProps={{ disabled: IsVisitCreated }}
+              onCancel={handleEditVisitModalCancel}
+              okText="Update"
+              maskClosable={false}
+            >
+              <div style={{ border: '1px solid #d9d9d9', padding: '16px', borderRadius: '4px', margin: '4px' }}>
+                <Row gutter={[16, 16]}>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>UHID:</span>
+                    <span>{selectedRecord && selectedRecord.UhId}</span>
+                  </Col>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Name:</span>
+                    <span>{selectedRecord && selectedRecord.PatientFirstName}</span>
+                  </Col>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold' }}>PatientGender:</span>
+                    <span>{selectedRecord && selectedRecord.PatientGender}</span>
+                  </Col>
+                </Row>
+                <Row gutter={[16, 16]}>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>VisitId:</span>
+                    <span>{selectedRecord && selectedRecord.GeneratedEncounterId}</span>
+                  </Col>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Age:</span>
+                    <span>{selectedRecord && selectedRecord.Age}</span>
+                  </Col>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Dob:</span>
+                    <span>{selectedRecord && formatDatefortable(selectedRecord.DateOfBirth)}</span>
+                  </Col>
+                </Row>
+              </div>
+              <div>
+                <Form key={selectedRecord.PatientId} form={form} layout="vertical">
+                  <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                    <Col span={6}>
+                      <Form.Item name="PatientType" label="Patient Type" rules={[{ required: true, message: 'Please select PatientType' }]}>
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="EncounterType" label="Encounter Type">
+                        <Select allowClear>
+                          {patientDropdown.EncounterType.map((option) => (
+                            <Select.Option key={option.LookupID} value={option.LookupID}>
+                              {option.LookupDescription}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                      <Form.Item name="KinTitle" label="Title">
+                        <Select allowClear>
+                          {patientDropdown.Title.map((option) => (
+                            <Select.Option key={option.LookupID} value={option.LookupID}>
+                              {option.LookupDescription}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                      <Form.Item name="KinName" label="Next of Kin. Name">
+                        <Input allowClear />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                    <Col span={6}>
+                      <Form.Item name="Department" label="Department" rules={[{ required: true, message: 'Please select Department' }]}>
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="EncounterReason" label="Encounter Reason">
+                        <Select allowClear>
+                          {patientDropdown.EncounterReason.map((option) => (
+                            <Select.Option key={option.LookupID} value={option.LookupID}>
+                              {option.LookupDescription}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="KinAddress" label="Next of Kin. Address">
+                        <Input allowClear />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                    <Col span={6}>
+                      <Form.Item
+                        name="Provider"
+                        label="Provider"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select Provider'
+                          }
+                        ]}
+                      >
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="admittedUnder" label="Admitted Under">
+                        <Input allowClear />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="KinContactNo" label="Next of Kin. Contact No">
+                        <Input allowClear />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                    <Col span={6}>
+                      <Form.Item
+                        name="ServiceLocation"
+                        label="Service Location"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select Service Location'
+                          }
+                        ]}
+                      >
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="referredBy" label="Referred By">
+                        <Select allowClear>
+                          {patientDropdown.ReferredBy.map((option) => (
+                            <Select.Option key={option.ReferrerId} value={option.ReferrerId}>
+                              {option.ReferrerType}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item
+                        name="EditReason"
+                        label="Edit Reason"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select Service Location'
+                          }
+                        ]}
+                      >
+                        <Select allowClear>
+                          {patientDropdown.EncounterEditReason.map((option) => (
+                            <Select.Option key={option.LookupID} value={option.LookupID}>
+                              {option.LookupDescription}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Form>
+              </div>
+            </Modal>
+          </ConfigProvider>
+          <ConfigProvider
+            theme={{
+              token: {
+                zIndexPopupBase: 3000
+              }
+            }}
+          >
+            {/* {contextHolder} */}
+            <Modal
+              width={1000}
+              title="VisitModel"
+              open={isCancelVisitModalVisible}
+              onOk={handleOkCancel}
+              // okButtonProps={{ disabled: IsVisitCreated }}
+              onCancel={handleCancelVisitModalCancel}
+              // okText="Submit"
+              maskClosable={false}
+            >
+              <div style={{ border: '1px solid #d9d9d9', padding: '16px', borderRadius: '4px', margin: '4px' }}>
+                <Row gutter={[16, 16]}>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>UHID:</span>
+                    <span>{selectedRecord && selectedRecord.UhId}</span>
+                  </Col>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Name:</span>
+                    <span>{selectedRecord && selectedRecord.PatientFirstName}</span>
+                  </Col>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold' }}>PatientGender:</span>
+                    <span>{selectedRecord && selectedRecord.PatientGender}</span>
+                  </Col>
+                </Row>
+                <Row gutter={[16, 16]}>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>VisitId:</span>
+                    <span>{selectedRecord && selectedRecord.GeneratedEncounterId}</span>
+                  </Col>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Age:</span>
+                    <span>{selectedRecord && selectedRecord.Age}</span>
+                  </Col>
+                  <Col span={8}>
+                    <span style={{ fontWeight: 'bold', marginRight: '8px' }}>Dob:</span>
+                    <span>{selectedRecord && formatDatefortable(selectedRecord.DateOfBirth)}</span>
+                  </Col>
+                </Row>
+              </div>
+              <div>
+                <Form key={selectedRecord.PatientId} form={form1} layout="vertical">
+                  <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                    <Col span={6}>
+                      <Form.Item name="PatientType" label="Patient Type" rules={[{ required: true, message: 'Please select PatientType' }]}>
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="EncounterType" label="Encounter Type">
+                        <Select allowClear>
+                          {patientDropdown.EncounterType.map((option) => (
+                            <Select.Option key={option.LookupID} value={option.LookupID}>
+                              {option.LookupDescription}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={4}>
+                      <Form.Item name="KinTitle" label="Title">
+                        <Select allowClear>
+                          {patientDropdown.Title.map((option) => (
+                            <Select.Option key={option.LookupID} value={option.LookupID}>
+                              {option.LookupDescription}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                      <Form.Item name="KinName" label="Next of Kin. Name">
+                        <Input allowClear />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                    <Col span={6}>
+                      <Form.Item name="Department" label="Department" rules={[{ required: true, message: 'Please select Department' }]}>
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="EncounterReason" label="Encounter Reason">
+                        <Select allowClear>
+                          {patientDropdown.EncounterReason.map((option) => (
+                            <Select.Option key={option.LookupID} value={option.LookupID}>
+                              {option.LookupDescription}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="KinAddress" label="Next of Kin. Address">
+                        <Input allowClear />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                    <Col span={6}>
+                      <Form.Item
+                        name="Provider"
+                        label="Provider"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select Provider'
+                          }
+                        ]}
+                      >
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="admittedUnder" label="Admitted Under">
+                        <Input allowClear />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="KinContactNo" label="Next of Kin. Contact No">
+                        <Input allowClear />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                  <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+                    <Col span={6}>
+                      <Form.Item
+                        name="ServiceLocation"
+                        label="Service Location"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select Service Location'
+                          }
+                        ]}
+                      >
+                        <Input disabled />
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item name="referredBy" label="Referred By">
+                        <Select allowClear>
+                          {patientDropdown.ReferredBy.map((option) => (
+                            <Select.Option key={option.ReferrerId} value={option.ReferrerId}>
+                              {option.ReferrerType}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={6}>
+                      <Form.Item
+                        name="CancelEdit"
+                        label="CancelEdit"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Please select Service Location'
+                          }
+                        ]}
+                      >
+                        <Select allowClear>
+                          {patientDropdown.EncounterCancelReason.map((option) => (
+                            <Select.Option key={option.LookupID} value={option.LookupID}>
+                              {option.LookupDescription}
+                            </Select.Option>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Form>
+              </div>
+            </Modal>
+          </ConfigProvider>
+        </>
+      )}
     </>
   );
-}
+};
+
+export default Patient;

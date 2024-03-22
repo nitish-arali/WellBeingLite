@@ -18,6 +18,7 @@ export const urlGetDepartmentBasedOnPatitentType = `${baseURL}/api/Encounter/Get
 export const urlGetServiceLocationBasedonId = `${baseURL}/api/Encounter/GetServiceLocationBasedonId`;
 export const urlGetProviderBasedOnDepartment = `${baseURL}/api/Encounter/GetProviderBasedOnDepartment`;
 export const urlAddNewVisit = `${baseURL}/api/Encounter/SaveNewEncounter`;
+export const urlCancelVisit = `${baseURL}/api/Encounter/CancelEncounter`;
 export const urlAddNewService = `${baseURL}/api/Service/AddNewService`;
 export const urlCreateNewService = `${baseURL}/api/Service/CreateService`;
 export const urlGetServiceClassificationsForServiceGroup = `${baseURL}/api/Service/GetServiceClassificationsForServiceGroup`;
@@ -49,6 +50,14 @@ export const urlResultEntryIndex=`${baseURL}/api/Laboratory/ResultEntryIndex`;
 export const urlGetSelectedTestDataForResEntry=`${baseURL}/api/Laboratory/GetSelectedTestDataForResEntry`; 
 export const urlSaveTestsResultEntry=`${baseURL}/api/Laboratory/SaveTestsResultEntry`; 
 export const urlGetSelectedTestDataForResEntered=`${baseURL}/api/Laboratory/GetSelectedTestDataForResEntered`; 
+export const urlGetAllQueues=`${baseURL}/api/Queue/GetAllQueues`;
+export const urlGetAllProviders=`${baseURL}/api/Queue/GetAllProviders`;
+export const urlGetMarkArrival =`${baseURL}/api/Queue/MarkArrival`;
+export const urlGetPurchaseOrderDetails = `${baseURL}/api/PurchaseOrder/GetAllPurchaseOrderDetails`;
+export const urlCreatePurchaseOrder = `${baseURL}/api/PurchaseOrder/CreatePurchaseOrder`;
+export const urlAutoCompleteProduct =  `${baseURL}/api/PurchaseOrder/AutoCompleteProduct`;
+export const urlAddNewPurchaseOrder =  `${baseURL}/api/PurchaseOrder/AddNewPurchaseOrder`;
+export const urlGetServiceCharge =  `${baseURL}/api/Billing/GetServiceCharge`;
 
 
 

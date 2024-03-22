@@ -27,9 +27,14 @@ const SamplecollectionSearch = Loadable(lazy(() => import('views/Samplecollectio
 const ResultentrySearch = Loadable(lazy(() => import('views/ResultentrySearch/ResultentrySearch')));
 const ResultentryIndex = Loadable(lazy(() => import('views/ResultentryIndex/ResultentryIndex')));
 const SampleCollectionIndex = Loadable(lazy(() => import('views/SampleCollectionIndex/SampleCollectionIndex')));
-
+const QueueManagement = Loadable(lazy(() => import('views/QueueManagement/QueueManagement')));
 const NewPatient = Loadable(lazy(() => import('views/Patient/FormsUI/NewPatient')));
 const NewVisit = Loadable(lazy(() => import('views/Patient/FormsUI/NewVisit')));
+const Vitals = Loadable(lazy(() => import('views/QueueManagement/Vitals')));
+const PurchaseOrder = Loadable(lazy(() => import('views/InventoryManagement/PurchaseOrder')));
+const CreatePurchaseOrder = Loadable(lazy(() => import('views/InventoryManagement/CreatePurchaseOrder')));
+const Edit = Loadable(lazy(() => import('views/Patient/FormsUI/EditRegistrationDetails/index')));
+const BillingCreate = Loadable(lazy(() => import('views/Billing/BillingCreate')));
 
 const MainRoutes = {
   path: '/',
@@ -63,6 +68,10 @@ const MainRoutes = {
         {
           path: '/patient',
           element: <Patient />
+        },
+        {
+          path: 'Edit', // This is the new path for /Patient/Edit
+          element: <Edit /> // Replace this with your component for editing a patient
         }
       ]
     },
@@ -78,6 +87,19 @@ const MainRoutes = {
       path: 'NewVisit',
       element: <NewVisit />
     },
+    {
+      path: 'queueManagement',
+      element: <QueueManagement />
+    },
+    {
+      path: 'CreatePurchaseOrder',
+      element: <CreatePurchaseOrder />
+    },
+    {
+      path: 'vitals',
+      element: <Vitals />
+    },
+
     {
       path: 'SampleCollectionIndex/:patientId/:encounterId/:labnumber',
       element: <SampleCollectionIndex />
@@ -101,6 +123,19 @@ const MainRoutes = {
         {
           path: '/billing',
           element: <Billing />
+        },
+        {
+          path: 'Create',
+          element: <BillingCreate />
+        }
+      ]
+    },
+    {
+      path: 'purchaseOrder',
+      children: [
+        {
+          path: '/purchaseOrder',
+          element: <PurchaseOrder />
         }
       ]
     },

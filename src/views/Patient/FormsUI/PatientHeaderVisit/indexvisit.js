@@ -9,8 +9,10 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import React, { useState } from 'react';
 import Chip from '@mui/material/Chip'; // Import Chip component
 import CreateVisitDialog from '../CreatevisitDialog/visitdialog';
-import EditRegistrationDialog from '../EditRegestrationDetails/index.js';
+import EditRegistrationDialog from '../EditRegistrationDetails/index.js';
 import MoreDetailsDialog from '../MoreDetails';
+import { useNavigate } from 'react-router';
+import VisitModal from '../CreatevisitDialog/visitModal';
 
 function PatientHeaderVisit({ patientdata }) {
   function showGenderPic(patientdata) {
@@ -84,10 +86,23 @@ function PatientHeaderVisit({ patientdata }) {
     setAnchorEl(null);
   };
 
-  const [isCreateVisitDialogOpen, setCreateVisitDialogOpen] = useState(false);
-  const [isEditRegistrationDialogOpen, setEditRegistrationDialogOpen] = useState(false);
   const [isMoreDetailsDialogOpen, setMoreDetailsDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null); // State to store the selected patient data
+
+  const navigate = useNavigate();
+
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
+  const handleMenuItemClick = () => {
+    // Additional logic before showing the modal can go here
+
+    setShowConfirmationModal(true);
+  };
+
+  const handleCloseConfirmationModal = () => {
+    // Handle the confirmation action here or update state if needed
+    setShowConfirmationModal(false); // Close the modal after confirmation
+  };
 
   const handleCreateVisit = () => {
     // Ensure that the dialog is not already open before opening it
@@ -118,19 +133,15 @@ function PatientHeaderVisit({ patientdata }) {
     setMoreDetailsDialogOpen(false);
     setSelectedPatient(null);
   };
-  const handleOpenEditRegistrationDialog = () => {
+  const handleEditRegistration = () => {
+    debugger;
     // Ensure that the dialog is not already open before opening it
-    if (!isEditRegistrationDialogOpen) {
-      setEditRegistrationDialogOpen(true);
-      setSelectedPatient(patientdata);
-    }
-    handleMenuClose(); // Close the menu
-  };
 
-  const handleCloseEditRegistrationDialog = () => {
-    // Close the EditRegistrationDialog and clear the selected patient data
-    setEditRegistrationDialogOpen(false);
-    setSelectedPatient(null);
+    setSelectedPatient(patientdata);
+
+    // Navigate to the new URL
+    navigate('/NewPatient', { state: { patient: patientdata.PatientId } });
+    // Close the menu
   };
 
   const patientContent = (
@@ -174,26 +185,15 @@ function PatientHeaderVisit({ patientdata }) {
           <MoreVertIcon fontSize="large" />
         </IconButton>
         <Menu id="patient-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
-          <MenuItem onClick={handleCreateVisit}>Create Visit</MenuItem>
+          <MenuItem onClick={handleMenuItemClick}>Create Visit</MenuItem>
           <MenuItem onClick={handlemoreDetails}>More Details</MenuItem>
-          <MenuItem onClick={handleOpenEditRegistrationDialog}>Edit Reg Details</MenuItem>
+          <MenuItem onClick={handleEditRegistration}>Edit Reg Details</MenuItem>
         </Menu>
       </Grid>
       {/* Add the CreateVisitDialog component */}
-      {isCreateVisitDialogOpen && (
-        <CreateVisitDialog isOpen={isCreateVisitDialogOpen} onClose={handleCloseDialog} selectedRow={selectedPatient} />
-      )}
-
+      {showConfirmationModal && <VisitModal handleCloseConfirmationModal={handleCloseConfirmationModal} selectedRow={patientdata} />}
       {isMoreDetailsDialogOpen && (
         <MoreDetailsDialog isOpen={isMoreDetailsDialogOpen} onClose={handleCloseMoreDetailsDialog} selectedRow={selectedPatient} />
-      )}
-
-      {isEditRegistrationDialogOpen && (
-        <EditRegistrationDialog
-          open={isEditRegistrationDialogOpen}
-          onClose={handleCloseEditRegistrationDialog}
-          selectedRow={selectedPatient}
-        />
       )}
     </Grid>
   );

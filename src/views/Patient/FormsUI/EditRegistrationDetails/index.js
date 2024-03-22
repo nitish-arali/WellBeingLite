@@ -3,6 +3,7 @@ import { Spin, Skeleton, Button, Col, Form, Input, InputNumber, Row, Select, Dat
 import Layout from 'antd/es/layout/layout';
 import { SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router';
+import { useLocation } from 'react-router-dom';
 const { Option } = Select;
 
 import {
@@ -16,18 +17,24 @@ import customAxios from '../CustomAxios/index';
 import Title from 'antd/es/typography/Title';
 import TextArea from 'antd/es/input/TextArea';
 import WebcamImage from 'components/WebCam';
-import dayjs from 'dayjs';
 import moment from 'moment';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
+import dayjs from 'dayjs';
 
-const NewPatient = () => {
+const EditRegistration = () => {
+  debugger;
+  const location = useLocation();
+  const selectedRow = location.state.selectedRow;
+
+  console.log('check the value of selected Row ', selectedRow);
+
   const [patientDropdown, setPatientDropdown] = useState({
     Title: [],
     Gender: [],
     BloodGroup: [],
     MaritalStatus: [],
     Countries: [],
-    Statesnew: [],
+    States: [],
+    Places: [],
     PatientType: [],
     KinTitle: [],
     VisitType: [],
@@ -35,12 +42,8 @@ const NewPatient = () => {
     Ethnicity: [],
     Language: []
   });
-
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
   const [age, setAge] = useState({ years: 0, months: 0, days: 0 });
-
-  const [selecteddob, setselecteddob] = useState('');
-
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
@@ -48,19 +51,30 @@ const NewPatient = () => {
   const [filteredStates, setFilteredStates] = useState([]);
   const [filteredCities, setFilteredCities] = useState([]);
   const [filteredAreas, setFilteredAreas] = useState([]);
-
-  const [departments, setDepartments] = useState([]);
-  const [providers, setProviders] = useState([]);
-  const [serviceLocations, setServiceLocations] = useState([]);
-  const [selectedPatientType, setSelectedPatientType] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedProvider, setSelectedProvider] = useState('');
-  const [selectedServiceLocation, setSelectedServiceLocation] = useState('');
+  const [selecteddob, setselecteddob] = useState(null);
   const [loadings, setLoadings] = useState(false);
   const [isloading, setLoading] = useState(true);
   const [uploadedImage, setUploadedImage] = useState(null);
-  /*  const location = useLocation();
-  const patientData = location.state ? location.state.patient : null; */
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const [patientDetails, setPatientDetails] = useState([]);
+  const [dob, setDob] = useState(null);
+
+  useEffect(() => {
+    debugger;
+    customAxios.get(`${urlGetPatientDetail}?PatientId=${selectedRow.PatientId}`).then((response) => {
+      const apiData = response.data.data;
+      const patientData = response.data.data.AddNewPatient;
+      setPatientDropdown(apiData);
+      setPatientDetails(patientData);
+      setFilteredStates(response.data.data.PermanentStates);
+      setFilteredCities(response.data.data.PermanentPlaces);
+      setFilteredAreas(response.data.data.PermanentAreas);
+      setDob(patientData.DateOfBirthstring);
+
+      setLoading(false);
+    });
+  }, []);
 
   const handleImageUpload = (base64data) => {
     setUploadedImage(base64data);
@@ -84,9 +98,7 @@ const NewPatient = () => {
   const handleDateChange = (date, dateString) => {
     debugger;
     setSelectedDate(date);
-    // Calculate age based on the selected date and update the age state
-
-    setselecteddob(dateString);
+    setDob(dateString);
 
     const today = dayjs();
     const dob = dayjs(date, { format: 'DD-MM-YYYY' }); // Assuming the date format is DD-MM-YYYY
@@ -109,41 +121,6 @@ const NewPatient = () => {
     });
   };
 
-  const handleYearsChange = (e) => {
-    debugger;
-    const newYears = parseInt(e.target.value, 10);
-
-    // Check if newYears is a valid number
-    if (!isNaN(newYears) && newYears >= 1 && newYears <= 100) {
-      // Calculate the new date of birth based on the entered years
-      const newYears = parseInt(e.target.value, 10);
-      console.log('new year value', newYears);
-
-      // Calculate the new date of birth based on the entered years
-      const newDob = dayjs().subtract(newYears, 'year').startOf('year');
-
-      console.log('new dob value', newDob);
-      setSelectedDate(newDob);
-      setselecteddob(newDob.format('DD-MM-YYYY'));
-
-      setAge({
-        years: newYears,
-        months: 0,
-        days: 0
-      });
-    } else {
-      // Handle the case where the entered value is not a valid number
-      setAge({
-        years: 0,
-        months: 0,
-        days: 0
-      });
-
-      setSelectedDate(null);
-      setselecteddob('');
-    }
-  };
-
   const handleCountryChange = (newCountry) => {
     form.setFieldsValue({
       country: newCountry,
@@ -153,6 +130,7 @@ const NewPatient = () => {
     });
 
     setSelectedCountry(newCountry);
+    setFilteredCities([]);
 
     if (!newCountry) {
       // If newCountry is undefined, clear states and selected state
@@ -217,79 +195,6 @@ const NewPatient = () => {
     }
   };
 
-  useEffect(() => {
-    debugger;
-    customAxios.get(urlGetPatientDetail).then((response) => {
-      const apiData = response.data.data;
-      setPatientDropdown(apiData);
-      setLoading(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (selectedPatientType) {
-        try {
-          const response = await customAxios.get(`${urlGetDepartmentBasedOnPatitentType}?PatientType=${selectedPatientType}`);
-          if (response.status === 200) {
-            const dept = response.data.data.Department;
-            setDepartments(dept);
-          } else {
-            console.error('Failed to fetch departments');
-          }
-        } catch (error) {
-          console.error('Error fetching departments:', error);
-        }
-      } else {
-        // Reset the department dropdown if no patient type is selected
-        setDepartments([]);
-        setSelectedDepartment('');
-      }
-    };
-
-    fetchData();
-  }, [selectedPatientType, setSelectedDepartment, setDepartments]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      // Fetch data for the "provider" and "servicelocation" dropdowns when "selectedDepartment" changes
-      if (selectedDepartment) {
-        try {
-          const providerResponse = await customAxios.get(`${urlGetProviderBasedOnDepartment}?DepartmentId=${selectedDepartment}`);
-          const serviceLocationResponse = await customAxios.get(
-            `${urlGetServiceLocationBasedonId}?DepartmentId=${selectedDepartment}&patienttype=${selectedPatientType}`
-          );
-
-          if (providerResponse.status === 200) {
-            const provider = providerResponse.data.data.Provider;
-            setProviders(provider);
-          } else {
-            console.error('Failed to fetch providers');
-          }
-
-          if (serviceLocationResponse.status === 200) {
-            const serviceloc = serviceLocationResponse.data.data.ServiceLocation;
-            setServiceLocations(serviceloc);
-          } else {
-            console.error('Failed to fetch service locations');
-          }
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      } else {
-        // Reset the provider and servicelocation dropdowns if no department is selected
-        setProviders([]);
-        setServiceLocations([]);
-        setSelectedProvider('');
-        setSelectedServiceLocation('');
-      }
-    };
-
-    fetchData();
-  }, [selectedDepartment, selectedPatientType]);
-
-  const [form] = Form.useForm();
-  const navigate = useNavigate();
   const handleBackToList = () => {
     debugger;
     const url = `/patient`;
@@ -313,24 +218,20 @@ const NewPatient = () => {
     setLoadings(true);
     console.log('Received values from form: ', values);
 
-    // values.dob = selecteddob;
+    values.DateOfBirthstring = dob;
     const postData = {
-      PatientId: 0,
+      PatientId: selectedRow.PatientId,
       PatientFirstName: values.PatientFirstName,
       PatientMiddleName: values.PatientMiddleName,
       PatientLastName: values.PatientLastName,
       FacilityId: 1,
       MobileNumber: values.MobileNumber,
-      PatientTitle: values.title,
+      PatientTitle: values.PatientTitle,
       Gender: values.PatientGender,
-      /*  PatientType: values.PatientType,
-      FacilityDepartmentId: values.Department,
-      FacilityDepartmentServiceLocationId: values.ServiceLocation,
-      ProviderId: values.Provider, */
-      DateOfBirthstring: selecteddob,
-      FatherHusbandTitle: values.titleFatherHusband,
+      DateOfBirthstring: values.DateOfBirthstring,
+      FatherHusbandTitle: values.FatherHusbandTitle,
       PresentAddress1: values.PermanentAddress1,
-      ReligionId: values.Religion,
+      ReligionId: values.ReligionId,
       Height: values.Height,
       Weight: values.Weight,
       MaritalStatus: values.MaritalStatus,
@@ -341,14 +242,16 @@ const NewPatient = () => {
       PermanentCountryId: values.country,
       PermanentStateId: values.state,
       PermanentPlaceId: values.city,
+      PermanentAreaId: values.area,
       PermanentPinCode: values.PermanentPinCode,
       PresentCountryId: values.country,
       PresentStateId: values.state,
       PresentPlaceId: values.city,
+      PresentAreaId: values.area,
       PresentPinCode: values.PermanentPinCode,
       LandlineNumber: values.LandlineNumber,
       Occupation: values.Occupation,
-      EthnicityId: values.Ethnicity,
+      EthnicityId: values.EthnicityId,
       PrimaryLanguageId: values.PrimaryLanguageId,
       CanSpeakEnglish: values.CanSpeakEnglish,
       BirthPlace: values.BirthPlace,
@@ -369,17 +272,12 @@ const NewPatient = () => {
         throw new Error(`Server responded with status code ${response.status}`);
       }
 
-      // Process the response data (this assumes the server responds with JSON)
-      const data = response.data.data.PatientDetail.UhId;
-
-      console.log('Response data: ', data);
-
       // Display success notification
       notification.success({
-        message: 'Patient Registration Successful',
-        description: `The patient details have been successfully registered. The UHID is${data}.`
+        message: 'Patient Details Updated',
+        description: `The patient details have been successfully updated.`
       });
-      handleBackToList();
+
       setLoadings(false);
     } catch (error) {
       console.error('Failed to send data to server: ', error);
@@ -408,7 +306,7 @@ const NewPatient = () => {
             <Row style={{ padding: '0.5rem 2rem 0.5rem 2rem', backgroundColor: '#40A2E3', borderRadius: '10px 10px 0px 0px ' }}>
               <Col span={16}>
                 <Title level={4} style={{ color: 'white', fontWeight: 500, margin: 0, paddingTop: 0 }}>
-                  Register New Patient
+                  Edit Patient Details
                 </Title>
               </Col>
               <Col offset={5} span={3}>
@@ -427,13 +325,43 @@ const NewPatient = () => {
               onFinish={handleOnFinish}
               scrollToFirstError={true}
               style={{ padding: '0rem 2rem' }}
+              initialValues={{
+                DateOfBirthstring: dayjs(patientDetails.DateOfBirthstring, 'DD-MM-YYYY'),
+                PatientFirstName: patientDetails.PatientFirstName,
+                PatientMiddleName: patientDetails.PatientMiddleName,
+                PatientLastName: patientDetails.PatientLastName,
+                MobileNumber: patientDetails.MobileNumber,
+                PatientTitle: patientDetails.PatientTitle,
+                PatientGender: patientDetails.Gender,
+                FatherHusbandTitle: patientDetails.FatherHusbandTitle,
+                PermanentAddress1: patientDetails.PermanentAddress1,
+                ReligionId: patientDetails.ReligionId,
+                Height: patientDetails.Height,
+                Weight: patientDetails.Weight,
+                MaritalStatus: patientDetails.MaritalStatus,
+                BloodGroup: patientDetails.BloodGroup,
+                EmailId: patientDetails.EmailId,
+                FatherHusbandName: patientDetails.FatherHusbandName,
+                PermanentPinCode: patientDetails.PermanentPinCode,
+                country: patientDetails.PermanentCountryId ? patientDetails.PermanentCountryId : null,
+                state: patientDetails.PermanentStateId ? patientDetails.PermanentStateId : null,
+                city: patientDetails.PermanentPlaceId ? patientDetails.PermanentPlaceId : null,
+                area: patientDetails.PermanentAreaId ? patientDetails.PermanentAreaId : null,
+                LandlineNumber: patientDetails.LandlineNumber,
+                Occupation: patientDetails.Occupation,
+                EthnicityId: patientDetails.EthnicityId,
+                PrimaryLanguageId: patientDetails.PrimaryLanguageId,
+                CanSpeakEnglish: patientDetails.CanSpeakEnglish,
+                BirthPlace: patientDetails.BirthPlace,
+                BirthIdentification1: patientDetails.BirthIdentification
+              }}
             >
               <Row gutter={20}>
                 <Col span={18}>
                   <Row gutter={16}>
                     <Col span={3}>
                       <Form.Item
-                        name="title"
+                        name="PatientTitle"
                         label="Title"
                         // hasFeedback
                         rules={[
@@ -521,7 +449,7 @@ const NewPatient = () => {
                     </Col>
                     <Col span={7}>
                       <Form.Item
-                        name="dob"
+                        name="DateOfBirthstring"
                         label="Date of Birth"
                         rules={[
                           {
@@ -532,7 +460,7 @@ const NewPatient = () => {
                       >
                         <DatePicker
                           style={{ width: '100%' }}
-                          value={selectedDate}
+                          // value={dob}
                           onChange={handleDateChange}
                           disabledDate={disabledDate}
                           format={'DD-MM-YYYY'}
@@ -548,8 +476,7 @@ const NewPatient = () => {
                               // placeholder="Years"
                               min={1}
                               max={100}
-                              value={age.years.toString()}
-                              onChange={handleYearsChange}
+                              value={age.years}
                             />
                           </Form.Item>
                         </Col>
@@ -580,7 +507,7 @@ const NewPatient = () => {
                       </Row>
                     </Col>
                     <Col span={3}>
-                      <Form.Item name="titleFatherHusband" label="Title">
+                      <Form.Item name="FatherHusbandTitle" label="Title">
                         <Select allowClear>
                           {patientDropdown.Title.map((option) => (
                             <Select.Option key={option.LookupID} value={option.LookupID}>
@@ -706,7 +633,7 @@ const NewPatient = () => {
                 </Col>
                 <Col span={6}>
                   <Form.Item name="LandlineNumber" label="Landline Number">
-                    <Input />
+                    <Input type="number" min={0} />
                   </Form.Item>
                 </Col>
                 <Col span={6}>
@@ -742,7 +669,7 @@ const NewPatient = () => {
                   </Form.Item>
                 </Col>
                 <Col span={6}>
-                  <Form.Item name="Religion" label="Religion">
+                  <Form.Item name="ReligionId" label="Religion">
                     <Select placeholder="Select Religion" allowClear>
                       {patientDropdown.Religion.map((option) => (
                         <Select.Option key={option.LookupID} value={option.LookupID}>
@@ -819,4 +746,4 @@ const NewPatient = () => {
     </>
   );
 };
-export default NewPatient;
+export default EditRegistration;
